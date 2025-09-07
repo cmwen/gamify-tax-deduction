@@ -202,7 +202,9 @@ flutter build ios --no-codesign
 
 ## Common Tasks
 
-### Repository Root Listing:
+The following are outputs from frequently run commands. Reference them instead of viewing, searching, or running bash commands to save time.
+
+### Repository Root Structure:
 ```
 .
 ├── .github/              # GitHub workflows and configurations
@@ -221,12 +223,33 @@ flutter build ios --no-codesign
 ```
 
 ### Key Dependencies (from pubspec.yaml):
-- **sqflite**: Local SQLite database
-- **camera**: Camera access for receipt scanning
-- **google_mlkit_text_recognition**: OCR text recognition
-- **path_provider**: File system access
-- **flutter_secure_storage**: Secure local storage
-- **uuid**: Unique identifier generation
+```yaml
+dependencies:
+  flutter: sdk: flutter
+  sqflite: ^2.3.0                    # Local SQLite database
+  camera: ^0.10.5+5                  # Camera access for receipt scanning
+  google_mlkit_text_recognition: ^0.12.0  # OCR text recognition
+  path_provider: ^2.1.1              # File system access
+  flutter_secure_storage: ^9.0.0     # Secure local storage
+  uuid: ^4.1.0                       # Unique identifier generation
+
+dev_dependencies:
+  flutter_test: sdk: flutter
+  flutter_lints: ^3.0.0              # Linting rules
+```
+
+### CI Workflow Commands (from .github/workflows/ci.yml):
+```bash
+# Linting Job:
+flutter pub get
+flutter analyze
+
+# Build and Test Job:
+flutter pub get
+flutter test
+flutter build apk --debug
+flutter build ios --no-codesign
+```
 
 ### Architecture Notes:
 - **Privacy-First**: All data stays local, no cloud services
@@ -280,5 +303,34 @@ flutter build ios --no-codesign
 - **Hot Reload**: Subsequent changes are much faster (5-10 seconds)
 - **Database**: SQLite operations are synchronous and fast
 - **OCR**: On-device text recognition may take 1-2 seconds per image
+
+## Quick Reference
+
+### Most Common Development Commands:
+```bash
+# When you can install Flutter locally (rare due to network restrictions):
+flutter pub get      # Install dependencies (2-3 min, timeout: 10+ min)
+flutter analyze      # Code analysis (30-60 sec, timeout: 3+ min)
+flutter test         # Run tests (1-2 min, timeout: 5+ min)
+flutter run          # Launch app (2-3 min, timeout: 10+ min)
+
+# When Flutter installation fails (common scenario):
+# 1. Make code changes using any editor
+# 2. Validate syntax by examining imports and structure
+# 3. Push changes and rely on CI for validation
+git add . && git commit -m "Your changes" && git push
+```
+
+### File Editing Priorities:
+1. **lib/features/dashboard/dashboard_screen.dart** - Main UI (175 lines)
+2. **lib/core/models/data_models.dart** - Data structures (69 lines)  
+3. **lib/core/database/database_helper.dart** - Database operations (69 lines)
+4. **test/core/** - Unit tests for core functionality
+
+### When Making Changes:
+- **Always check**: Imports, syntax, and logical flow
+- **Always run** (if Flutter available): `flutter analyze` and `flutter test`
+- **Always validate**: Push to branch and check CI results
+- **Always document**: Any network/environment limitations encountered
 
 This codebase is well-structured for Flutter development with clear separation of concerns, comprehensive testing, and a focus on privacy-first architecture.
