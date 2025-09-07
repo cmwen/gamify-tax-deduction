@@ -41,7 +41,8 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
         });
       }
     } catch (e) {
-      debugPrint('Error initializing camera: $e');
+      // Handle camera initialization error silently
+      // The UI will show loading indicator if camera fails to initialize
     }
   }
 
