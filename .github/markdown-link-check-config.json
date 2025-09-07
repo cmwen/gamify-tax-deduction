@@ -1,0 +1,11 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^#"
+    }
+  ],
+  "aliveStatusCodes": [200, 206, 999],
+  "retryOn429": true,
+  "retryCount": 5,
+  "fallbackHttpStatus": [400, 401, 403, 404, 500, 502, 503, 504]
+}

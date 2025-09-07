@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Swift (iOS Linting)
+      if: runner.os == 'Linux'
+      run: |
+        # SwiftLint will be added when iOS project is created
+        echo "SwiftLint setup placeholder"
+    
+    - name: Setup Java (Android Linting)
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+    
+    - name: Lint Android Code
+      run: |
+        if [ -f "src/platform/android/gradlew" ]; then
+          cd src/platform/android
+          ./gradlew ktlintCheck
+        else
+          echo "Android project not yet created"
+        fi
+
+  build_and_test_ios:
+    name: Build and Test iOS
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    
+    - name: Build iOS Project
+      run: |
+        if [ -d "src/platform/ios" ] && [ -f "src/platform/ios/GamifiedTaxDeduction.xcodeproj/project.pbxproj" ]; then
+          cd src/platform/ios
+          xcodebuild clean build -scheme GamifiedTaxDeduction -destination 'platform=iOS Simulator,name=iPhone 14'
+        else
+          echo "iOS project not yet created"
+        fi
+    
+    - name: Run iOS Tests
+      run: |
+        if [ -d "src/platform/ios" ] && [ -f "src/platform/ios/GamifiedTaxDeduction.xcodeproj/project.pbxproj" ]; then
+          cd src/platform/ios
+          xcodebuild test -scheme GamifiedTaxDeduction -destination 'platform=iOS Simulator,name=iPhone 14'
+        else
+          echo "iOS tests not yet available"
+        fi
+
+  build_and_test_android:
+    name: Build and Test Android
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v2
+    
+    - name: Build Android Project
+      run: |
+        if [ -f "src/platform/android/gradlew" ]; then
+          cd src/platform/android
+          ./gradlew clean build
+        else
+          echo "Android project not yet created"
+        fi
+    
+    - name: Run Android Unit Tests
+      run: |
+        if [ -f "src/platform/android/gradlew" ]; then
+          cd src/platform/android
+          ./gradlew test
+        else
+          echo "Android tests not yet available"
+        fi
+
+  documentation:
+    name: Check Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Check Markdown Links
+      uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        use-quiet-mode: 'yes'
+        use-verbose-mode: 'yes'
+        config-file: '.github/markdown-link-check-config.json'
+        folder-path: 'docs'
+        max-depth: 3
