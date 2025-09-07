@@ -8,7 +8,7 @@ This document translates the product backlog into a technical and UX design for 
 ---
 
 ## 2. Foundational Scaffolding & Hygiene (Epic 1)
-**Backlog Link**: [Epic 1: Foundational Scaffolding & Hygiene](#)
+**Backlog Link**: Epic 1: Foundational Scaffolding & Hygiene
 **Goal**: Establish a clean, maintainable, and community-friendly repository to support our open-source vision.
 **[Design → Execution]**
 
@@ -46,7 +46,7 @@ gamify-tax-deduction/
 A comprehensive `.gitignore` will be created to ignore common OS, IDE, build, and dependency artifacts for Flutter development, including build folders, IDE configurations, and platform-specific generated files.
 
 ### 2.4. CI/CD Pipeline (GitHub Actions)
-**Backlog Link**: [Story 1.2: Setup CI/CD Pipeline](#)
+**Backlog Link**: Story 1.2: Setup CI/CD Pipeline
 A `ci.yml` workflow will be established with the following steps:
 1. **Trigger**: On push to `main` and on pull requests targeting `main`.
 2. **Jobs**:
@@ -61,7 +61,7 @@ A `ci.yml` workflow will be established with the following steps:
 ---
 
 ## 3. MVP Architecture & Design (Epic 2)
-**Backlog Link**: [Epic 2: MVP - Core Habit Loop](#)
+**Backlog Link**: Epic 2: MVP - Core Habit Loop
 **Goal**: Design the core features for the MVP, focusing on the local-first, privacy-centric habit loop.
 
 ### 3.1. High-Level Architecture
@@ -162,7 +162,7 @@ The user flow is designed to be as frictionless as possible to encourage habit f
 This flow provides an immediate, positive feedback loop right after the user performs the desired action (scanning a receipt).
 
 ### 3.5. Educational Content Integration (Story 3.2)
-**Backlog Link**: [Story 3.2: Educational Tooltips](#)
+**Backlog Link**: Story 3.2: Educational Tooltips
 **[Design → QA]** *QA should validate that educational content enhances rather than interrupts the core flow.*
 
 Educational content will be contextually integrated to enhance user understanding without disrupting the habit formation loop:
@@ -196,7 +196,7 @@ Equipment Purchase Example:
 - **Settings Screen**: "Learn About Deductions" section with comprehensive guides
 
 ### 3.6. Gamification System Design (Story 2.4)
-**Backlog Link**: [Story 2.4: Basic Gamification - Progress Tracker](#)
+**Backlog Link**: Story 2.4: Basic Gamification - Progress Tracker
 **Goal**: Drive sustained engagement through achievement psychology without manipulation.
 
 #### 3.6.1. Achievement Framework
@@ -238,7 +238,7 @@ Dashboard Gamification Section:
 - **Social Sharing**: Option to share milestones (respecting privacy - no dollar amounts)
 
 ### 3.7. Community Contribution Framework Design
-**Backlog Link**: [Story 1.3: Define Contribution Guidelines](#)
+**Backlog Link**: Story 1.3: Define Contribution Guidelines
 **[Design → Execution]** *This section addresses the open-source community experience.*
 
 #### 3.7.1. Contributor Onboarding Flow

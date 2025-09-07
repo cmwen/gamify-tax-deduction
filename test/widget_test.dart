@@ -3,8 +3,14 @@ import 'package:gamified_tax_deduction/main.dart';
 
 void main() {
   testWidgets('App starts and displays dashboard', (WidgetTester tester) async {
+    // Ensure Flutter binding is initialized for database operations
+    TestWidgetsFlutterBinding.ensureInitialized();
+    
     // Build our app and trigger a frame.
     await tester.pumpWidget(const GamifiedTaxDeductionApp());
+    
+    // Pump and settle to wait for async operations to complete
+    await tester.pumpAndSettle();
 
     // Verify that the dashboard screen is displayed
     expect(find.text('Tax Deduction Tracker'), findsOneWidget);
