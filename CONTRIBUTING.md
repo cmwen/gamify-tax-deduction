@@ -35,21 +35,24 @@ We're building a privacy-first, gamified tax deduction tracker that helps people
 
 #### Development Environment Setup
 
-##### iOS Development
-- **Requirements**: macOS, Xcode 13.0+, iOS 15.0+
+##### Flutter Development
+- **Requirements**: Flutter 3.24.4+, Dart SDK 3.0.0+
 - **Setup**:
   ```bash
-  cd src/platform/ios
-  # Install dependencies (if any)
-  open GamifiedTaxDeduction.xcodeproj
-  ```
-
-##### Android Development
-- **Requirements**: Android Studio, SDK 24+, Java 11+
-- **Setup**:
-  ```bash
-  cd src/platform/android
-  # Open in Android Studio and sync Gradle
+  # Clone and install dependencies
+  git clone https://github.com/cmwen/gamify-tax-deduction.git
+  cd gamify-tax-deduction
+  flutter pub get
+  
+  # Run the app
+  flutter run
+  
+  # Run tests
+  flutter test
+  
+  # Build for platforms
+  flutter build apk --debug  # Android
+  flutter build ios --no-codesign  # iOS (requires macOS)
   ```
 
 #### Code Style Guidelines

@@ -211,8 +211,7 @@ The following are outputs from frequently run commands. Reference them instead o
 ├── .gitignore           # Git ignore file
 ├── CONTRIBUTING.md      # Contributor guidelines
 ├── LICENSE              # MIT license
-├── README.md            # Main project documentation
-├── README_FLUTTER.md    # Flutter-specific setup guide
+├── README.md            # Main project documentation (Flutter setup guide)
 ├── analysis_options.yaml # Dart/Flutter linting configuration
 ├── android/             # Android platform configuration
 ├── docs/                # Project documentation
