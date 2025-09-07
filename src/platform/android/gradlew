@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-# Gradle wrapper script for Android builds
-# This script allows running Gradle commands consistently across environments
-
-GRADLE_WRAPPER_VERSION=7.6

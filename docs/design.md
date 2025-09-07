@@ -21,37 +21,42 @@ gamify-tax-deduction/
 │   └── workflows/
 │       └── ci.yml        # Continuous Integration workflow
 ├── docs/                 # Project documentation (vision, backlog, design, etc.)
-├── src/                  # Source code
-│   ├── app/              # Main application entry point and configuration
+├── lib/                  # Flutter source code
+│   ├── main.dart         # Application entry point
 │   ├── features/         # Feature-based modules (e.g., UserProfile, ReceiptScanner)
 │   ├── core/             # Shared business logic, utilities, data models
-│   └── platform/         # Platform-specific implementations (iOS/Android)
-├── tests/                # Unit, integration, and E2E tests
+│   └── shared/           # Shared widgets and utilities
+├── test/                 # Unit and widget tests
+├── integration_test/     # Integration tests
+├── android/              # Android-specific configuration
+├── ios/                  # iOS-specific configuration
 ├── .gitignore            # Files and directories to ignore
+├── pubspec.yaml          # Flutter dependencies and configuration
 ├── CONTRIBUTING.md       # Guidelines for contributors
 ├── LICENSE               # Project license (e.g., MIT)
 └── README.md             # Project overview and setup instructions
 ```
 
 ### 2.2. Technology Stack Recommendation
-- **iOS**: Swift, SwiftUI, XCTest.
-- **Android**: Kotlin, Jetpack Compose, JUnit.
-- **Rationale**: A dual-native approach is chosen over cross-platform frameworks (like React Native or Flutter) to achieve the highest performance for on-device OCR and provide a seamless, platform-native user experience. This is critical for the core "scan and reward" loop.
+- **Cross-Platform**: Flutter with Dart, using native camera and ML Kit plugins.
+- **Testing**: Flutter's built-in testing framework with integration tests.
+- **Rationale**: Flutter is chosen to provide a consistent user experience across platforms while maintaining access to native device capabilities through plugins. This approach reduces development complexity, accelerates feature delivery, and ensures consistent behavior for the core "scan and reward" loop across iOS and Android.
 
 ### 2.3. `.gitignore` Baseline
-A comprehensive `.gitignore` will be created to ignore common OS, IDE, build, and dependency artifacts for both Swift/Xcode and Kotlin/Android Studio environments.
+A comprehensive `.gitignore` will be created to ignore common OS, IDE, build, and dependency artifacts for Flutter development, including build folders, IDE configurations, and platform-specific generated files.
 
 ### 2.4. CI/CD Pipeline (GitHub Actions)
 **Backlog Link**: [Story 1.2: Setup CI/CD Pipeline](#)
 A `ci.yml` workflow will be established with the following steps:
 1. **Trigger**: On push to `main` and on pull requests targeting `main`.
 2. **Jobs**:
-   - `lint`: Run a linter (e.g., SwiftLint for iOS, ktlint for Android) to enforce code style.
+   - `lint`: Run Flutter's built-in linter (`flutter analyze`) to enforce code style.
    - `build_and_test`:
      - Check out the code.
-     - Set up the appropriate environment (Xcode or JDK).
-     - Run a clean build.
-     - Execute all unit tests (including the initial smoke test).
+     - Set up Flutter environment.
+     - Run `flutter pub get` to install dependencies.
+     - Execute `flutter test` for unit tests.
+     - Run `flutter build` for both iOS and Android to ensure compilation succeeds.
 
 ---
 
@@ -64,7 +69,7 @@ The application will use a local-first, 3-tier architecture. All data lives on t
 
 ```
 +--------------------------------+
-|      Presentation Layer        |  (SwiftUI / Jetpack Compose)
+|      Presentation Layer        |  (Flutter Widgets)
 | (UI, Views, State Management)  |
 +--------------------------------+
              |
@@ -74,7 +79,7 @@ The application will use a local-first, 3-tier architecture. All data lives on t
 +--------------------------------+
              |
 +--------------------------------+
-|           Data Layer           |  (SQLite Wrapper, Local Storage)
+|           Data Layer           |  (SQLite via sqflite, Local Storage)
 |   (Database, File Storage)     |
 +--------------------------------+
 ```
@@ -82,22 +87,34 @@ The application will use a local-first, 3-tier architecture. All data lives on t
 ### 3.2. Data Models
 The following data structures will be used for the MVP. They will be stored locally.
 
-```typescript
-// Stored in a secure local key-value store (e.g., Keychain/Keystore)
-interface UserProfile {
-  incomeBracket: 'low' | 'medium' | 'high';
-  filingStatus: 'single' | 'married';
+```dart
+// Stored in a secure local key-value store (e.g., flutter_secure_storage)
+class UserProfile {
+  final String incomeBracket; // 'low' | 'medium' | 'high'
+  final String filingStatus; // 'single' | 'married'
+  
+  UserProfile({required this.incomeBracket, required this.filingStatus});
 }
 
 // Stored in the local SQLite database
-interface Receipt {
-  id: string; // UUID
-  createdAt: Date;
-  imagePath: string; // Path to the image file in local app storage
-  vendorName?: string;
-  totalAmount: number;
-  potentialTaxSaving: number;
-  category?: string; // For Post-MVP
+class Receipt {
+  final String id; // UUID
+  final DateTime createdAt;
+  final String imagePath; // Path to the image file in local app storage
+  final String? vendorName;
+  final double totalAmount;
+  final double potentialTaxSaving;
+  final String? category; // For Post-MVP
+  
+  Receipt({
+    required this.id,
+    required this.createdAt,
+    required this.imagePath,
+    this.vendorName,
+    required this.totalAmount,
+    required this.potentialTaxSaving,
+    this.category,
+  });
 }
 ```
 
@@ -106,24 +123,24 @@ interface Receipt {
 #### 3.3.1. On-Device OCR (Story 2.2)
 **[Design → QA]** *Risk: OCR accuracy is critical. QA should focus on testing with various receipt types (faded, crumpled, different currencies).*
 
-- **Approach 1: Native Frameworks (Apple Vision / Google ML Kit)**
-  - **Pros**: No cost, OS-optimized, ultimate privacy.
-  - **Cons**: Accuracy may differ between platforms.
+- **Approach 1: Google ML Kit via Flutter Plugin (google_mlkit_text_recognition)**
+  - **Pros**: Cross-platform consistency, OS-optimized, ultimate privacy, no cost.
+  - **Cons**: Requires Flutter plugin integration.
 - **Approach 2: Bundled Open-Source Model (e.g., TensorFlow Lite)**
-  - **Pros**: Consistent cross-platform accuracy.
+  - **Pros**: More control over model accuracy.
   - **Cons**: Increases app size, requires model maintenance.
 
-**Decision**: **Approach 1 (Native Frameworks)** is selected for the MVP. It aligns perfectly with our privacy-first vision, is cost-effective, and avoids the complexity of managing our own ML models.
+**Decision**: **Approach 1 (Google ML Kit via Flutter Plugin)** is selected for the MVP. It provides the best of both worlds - native performance with cross-platform consistency, aligns with our privacy-first vision, and is cost-effective.
 
 #### 3.3.2. Local Storage (Data Layer)
-- **Approach 1: High-Level ORMs (Core Data / Realm)**
-  - **Pros**: Powerful querying.
-  - **Cons**: Overkill for the MVP's simple data needs, higher learning curve for contributors.
-- **Approach 2: SQLite with a Lightweight Wrapper**
+- **Approach 1: High-Level ORMs (Hive / Isar)**
+  - **Pros**: Powerful querying, Flutter-native.
+  - **Cons**: Overkill for the MVP's simple data needs.
+- **Approach 2: SQLite with sqflite Plugin**
   - **Pros**: Simple, robust, transparent, and easy for new contributors to understand.
   - **Cons**: Requires more boilerplate code for complex queries (not an issue for MVP).
 
-**Decision**: **Approach 2 (SQLite)** is selected. We will use a modern wrapper like `GRDB.swift` (iOS) or `Room` (Android) to reduce boilerplate while maintaining simplicity and control.
+**Decision**: **Approach 2 (SQLite with sqflite)** is selected. This provides a familiar SQL interface that most developers understand, with the `sqflite` plugin providing Flutter integration while maintaining simplicity and control.
 
 ### 3.4. UI/UX Flow
 The user flow is designed to be as frictionless as possible to encourage habit formation.
