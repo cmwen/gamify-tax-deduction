@@ -1,85 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gamified_tax_deduction/core/models/user_profile.dart';
+import 'package:gamified_tax_deduction/core/services/profile_service.dart';
 import 'package:gamified_tax_deduction/features/profile/profile_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import 'profile_screen_test.mocks.dart';
+
+@GenerateMocks([ProfileService])
 void main() {
-  group('ProfileScreen', () {
-    testWidgets('should display saved profile data on load', (WidgetTester tester) async {
-      SharedPreferences.setMockInitialValues({
-        'user_income_bracket': 'medium',
-        'user_filing_status': 'married',
-      });
+  // Initialize ffi for sqflite
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
 
-      await tester.pumpWidget(const MaterialApp(home: ProfileScreen()));
-      await tester.pumpAndSettle(); // Wait for async initState to complete
+  late MockProfileService mockProfileService;
 
-      expect(find.text('medium'), findsOneWidget);
-      expect(find.text('married'), findsOneWidget);
-    });
+  setUp(() {
+    mockProfileService = MockProfileService();
+  });
 
-    testWidgets('Save button should be disabled until both fields are selected', (WidgetTester tester) async {
-      SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(const MaterialApp(home: ProfileScreen()));
+  final testProfile = UserProfile(
+    id: 'test_id',
+    filingStatus: FilingStatus.single,
+    incomeBracket: IncomeBracket.middle,
+  );
 
-      final saveButton = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
-      expect(saveButton.onPressed, isNull);
+  // Helper function to build the widget
+  Future<void> pumpScreen(WidgetTester tester) async {
+     await tester.pumpWidget(MaterialApp(home: ProfileScreen(profileService: mockProfileService)));
+  }
 
-      // Select income bracket
-      await tester.tap(find.text('Select Income Bracket'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('low').last);
-      await tester.pumpAndSettle();
+  testWidgets('should display profile data on load', (WidgetTester tester) async {
+    when(mockProfileService.getOrCreateProfile()).thenAnswer((_) async => testProfile);
 
-      final saveButtonAfterFirstSelection = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
-      expect(saveButtonAfterFirstSelection.onPressed, isNull);
+    await pumpScreen(tester);
+    await tester.pumpAndSettle();
 
-      // Select filing status
-      await tester.tap(find.text('Select Filing Status'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('single').last);
-      await tester.pumpAndSettle();
+    expect(find.text('single'), findsOneWidget);
+    expect(find.text('middle'), findsOneWidget);
+  });
 
-      final saveButtonAfterSecondSelection = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
-      expect(saveButtonAfterSecondSelection.onPressed, isNotNull);
-    });
+  testWidgets('Save button should be enabled when fields are selected', (WidgetTester tester) async {
+    when(mockProfileService.getOrCreateProfile()).thenAnswer((_) async => testProfile);
 
-    testWidgets('should save profile data when save button is pressed', (WidgetTester tester) async {
-      SharedPreferences.setMockInitialValues({});
+    await pumpScreen(tester);
+    await tester.pumpAndSettle();
 
-      await tester.pumpWidget(MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: Center(
-              child: ElevatedButton(
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())),
-                child: const Text('Go to Profile'),
-              ),
-            ),
-          ),
+    final saveButton = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
+    expect(saveButton.onPressed, isNotNull);
+  });
+
+  testWidgets('should save profile data when save button is pressed', (WidgetTester tester) async {
+    when(mockProfileService.getOrCreateProfile()).thenAnswer((_) async => testProfile);
+    when(mockProfileService.saveProfile(any)).thenAnswer((_) async {});
+
+    await tester.pumpWidget(MaterialApp(
+      home: Navigator(
+        onGenerateRoute: (settings) => MaterialPageRoute(
+          builder: (context) => ProfileScreen(profileService: mockProfileService),
         ),
-      ));
+      ),
+    ));
 
-      await tester.tap(find.text('Go to Profile'));
-      await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
 
-      // Select income bracket and filing status
-      await tester.tap(find.text('Select Income Bracket'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('high').last);
-      await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Select Filing Status'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('married').last);
-      await tester.pumpAndSettle();
+    verify(mockProfileService.saveProfile(any)).called(1);
 
-      await tester.tap(find.byType(ElevatedButton));
-      await tester.pumpAndSettle();
-
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString('user_income_bracket'), 'high');
-      expect(prefs.getString('user_filing_status'), 'married');
-    });
+    // Check that navigator was popped
+    expect(find.byType(ProfileScreen), findsNothing);
   });
 }

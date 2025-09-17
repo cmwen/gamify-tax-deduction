@@ -1,3 +1,5 @@
+import '../models/user_profile.dart';
+
 /// Tax calculation service for estimating potential tax savings
 /// Simplified calculations for MVP demonstration
 class TaxCalculationService {
@@ -16,23 +18,23 @@ class TaxCalculationService {
   /// Future enhancement: use actual income bracket and filing status
   static double calculateSavingWithProfile(
     double amount,
-    String incomeBracket,
-    String filingStatus,
+    IncomeBracket incomeBracket,
+    FilingStatus filingStatus,
   ) {
     double taxRate;
     
     switch (incomeBracket) {
-      case 'low':
+      case IncomeBracket.lowest:
+      case IncomeBracket.low:
         taxRate = 0.12; // 12% tax bracket
         break;
-      case 'medium':
+      case IncomeBracket.middle:
         taxRate = 0.22; // 22% tax bracket
         break;
-      case 'high':
+      case IncomeBracket.high:
+      case IncomeBracket.highest:
         taxRate = 0.32; // 32% tax bracket
         break;
-      default:
-        taxRate = 0.22; // Default to 22%
     }
 
     // Future: adjust for filing status differences

@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/data_models.dart';
 import '../models/achievement.dart';
+import '../models/user_profile.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -45,6 +46,13 @@ class DatabaseHelper {
         description TEXT NOT NULL,
         unlocked INTEGER NOT NULL,
         unlockedAt TEXT
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE user_profile(
+        id TEXT PRIMARY KEY,
+        filingStatus TEXT NOT NULL,
+        incomeBracket TEXT NOT NULL
       )
     ''');
     await _initializeAchievements(db);

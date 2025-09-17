@@ -1,48 +1,95 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gamified_tax_deduction/core/models/data_models.dart';
+import 'package:gamified_tax_deduction/core/database/database_helper.dart';
+import 'package:gamified_tax_deduction/core/models/user_profile.dart';
 import 'package:gamified_tax_deduction/core/services/profile_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
+import 'package:sqflite/sqflite.dart';
 
+import 'profile_service_test.mocks.dart';
+
+@GenerateMocks([DatabaseHelper, Database])
 void main() {
-  group('ProfileService', () {
-    late ProfileService profileService;
+  late MockDatabaseHelper mockDbHelper;
+  late MockDatabase mockDatabase;
+  late ProfileService profileService;
 
-    setUp(() {
-      profileService = ProfileService();
+  setUp(() {
+    mockDbHelper = MockDatabaseHelper();
+    mockDatabase = MockDatabase();
+    when(mockDbHelper.database).thenAnswer((_) async => mockDatabase);
+    profileService = ProfileService(dbHelper: mockDbHelper);
+  });
+
+  group('ProfileService', () {
+    final testProfile = UserProfile(
+      id: 'test_id',
+      filingStatus: FilingStatus.single,
+      incomeBracket: IncomeBracket.middle,
+    );
+
+    test('saveProfile calls db.insert', () async {
+      when(mockDatabase.insert(
+        any,
+        any,
+        conflictAlgorithm: anyNamed('conflictAlgorithm'),
+      )).thenAnswer((_) async => 1);
+
+      await profileService.saveProfile(testProfile);
+
+      verify(mockDatabase.insert(
+        'user_profile',
+        testProfile.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      )).called(1);
     });
 
-    test('getProfile returns null when no profile is saved', () async {
-      SharedPreferences.setMockInitialValues({});
+    test('getProfile returns a profile when one exists', () async {
+      when(mockDatabase.query(any, limit: anyNamed('limit')))
+          .thenAnswer((_) async => [testProfile.toMap()]);
+
       final profile = await profileService.getProfile();
+
+      expect(profile, isA<UserProfile>());
+      expect(profile?.id, testProfile.id);
+    });
+
+    test('getProfile returns null when no profile exists', () async {
+      when(mockDatabase.query(any, limit: anyNamed('limit')))
+          .thenAnswer((_) async => []);
+
+      final profile = await profileService.getProfile();
+
       expect(profile, isNull);
     });
 
-    test('saveProfile and getProfile work correctly', () async {
-      SharedPreferences.setMockInitialValues({});
-      const userProfile = UserProfile(
-        incomeBracket: 'high',
-        filingStatus: 'married',
-      );
+    test('getOrCreateProfile returns existing profile', () async {
+       when(mockDatabase.query(any, limit: anyNamed('limit')))
+          .thenAnswer((_) async => [testProfile.toMap()]);
 
-      await profileService.saveProfile(userProfile);
-      final retrievedProfile = await profileService.getProfile();
+      final profile = await profileService.getOrCreateProfile();
 
-      expect(retrievedProfile, isNotNull);
-      expect(retrievedProfile!.incomeBracket, userProfile.incomeBracket);
-      expect(retrievedProfile.filingStatus, userProfile.filingStatus);
+      expect(profile.id, testProfile.id);
+      verify(mockDatabase.query('user_profile', limit: 1)).called(1);
+      verifyNever(mockDatabase.insert(any, any));
     });
 
-    test('getProfile returns the correct data for a saved profile', () async {
-      SharedPreferences.setMockInitialValues({
-        'user_income_bracket': 'low',
-        'user_filing_status': 'single',
-      });
+    test('getOrCreateProfile creates a new profile if none exists', () async {
+       when(mockDatabase.query(any, limit: anyNamed('limit')))
+          .thenAnswer((_) async => []);
+      when(mockDatabase.insert(any, any,
+              conflictAlgorithm: anyNamed('conflictAlgorithm')))
+          .thenAnswer((_) async => 1);
 
-      final profile = await profileService.getProfile();
+      final profile = await profileService.getOrCreateProfile();
 
-      expect(profile, isNotNull);
-      expect(profile!.incomeBracket, 'low');
-      expect(profile.filingStatus, 'single');
+      expect(profile, isA<UserProfile>());
+      verify(mockDatabase.query('user_profile', limit: 1)).called(1);
+      verify(mockDatabase.insert(
+        'user_profile',
+        any,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      )).called(1);
     });
   });
 }

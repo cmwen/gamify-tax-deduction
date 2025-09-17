@@ -1,29 +1,47 @@
-import 'package:shared_preferences/shared_preferences.dart';
-import '../models/data_models.dart';
+import 'package:uuid/uuid.dart';
+import '../database/database_helper.dart';
+import '../models/user_profile.dart';
+import 'package:sqflite/sqflite.dart';
 
 class ProfileService {
-  static const String _incomeBracketKey = 'user_income_bracket';
-  static const String _filingStatusKey = 'user_filing_status';
+  final DatabaseHelper dbHelper;
 
-  /// Save user profile data to local storage
+  ProfileService({DatabaseHelper? dbHelper})
+      : dbHelper = dbHelper ?? DatabaseHelper.instance;
+
   Future<void> saveProfile(UserProfile profile) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_incomeBracketKey, profile.incomeBracket);
-    await prefs.setString(_filingStatusKey, profile.filingStatus);
+    final db = await dbHelper.database;
+    await db.insert(
+      'user_profile',
+      profile.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
-  /// Retrieve user profile data from local storage
   Future<UserProfile?> getProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    final incomeBracket = prefs.getString(_incomeBracketKey);
-    final filingStatus = prefs.getString(_filingStatusKey);
+    final db = await dbHelper.database;
+    // There should only ever be one user profile.
+    // The UI should enforce this.
+    final List<Map<String, dynamic>> maps = await db.query('user_profile', limit: 1);
 
-    if (incomeBracket != null && filingStatus != null) {
-      return UserProfile(
-        incomeBracket: incomeBracket,
-        filingStatus: filingStatus,
-      );
+    if (maps.isNotEmpty) {
+      return UserProfile.fromMap(maps.first);
     }
     return null;
+  }
+
+  Future<UserProfile> getOrCreateProfile() async {
+    final profile = await getProfile();
+    if (profile != null) {
+      return profile;
+    } else {
+      final newProfile = UserProfile(
+        id: const Uuid().v4(),
+        filingStatus: FilingStatus.single, // Default value
+        incomeBracket: IncomeBracket.middle, // Default value
+      );
+      await saveProfile(newProfile);
+      return newProfile;
+    }
   }
 }

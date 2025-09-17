@@ -1,30 +1,6 @@
 // Data models for the Gamified Tax Deduction app
 // Following the design document specifications
 
-class UserProfile {
-  final String incomeBracket; // 'low' | 'medium' | 'high'
-  final String filingStatus; // 'single' | 'married'
-  
-  const UserProfile({
-    required this.incomeBracket,
-    required this.filingStatus,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'incomeBracket': incomeBracket,
-      'filingStatus': filingStatus,
-    };
-  }
-
-  factory UserProfile.fromJson(Map<String, dynamic> json) {
-    return UserProfile(
-      incomeBracket: json['incomeBracket'],
-      filingStatus: json['filingStatus'],
-    );
-  }
-}
-
 class Receipt {
   final String id; // UUID
   final DateTime createdAt;

@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../../core/database/database_helper.dart';
 import '../../core/models/data_models.dart';
+import '../../core/models/user_profile.dart';
 import '../../core/services/tax_calculation_service.dart';
 import '../../core/services/profile_service.dart';
 
