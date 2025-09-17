@@ -7,6 +7,7 @@ import 'dart:io';
 import '../../core/database/database_helper.dart';
 import '../../core/models/data_models.dart';
 import '../../core/services/tax_calculation_service.dart';
+import '../../core/services/profile_service.dart';
 
 class ReceiptScannerScreen extends StatefulWidget {
   const ReceiptScannerScreen({super.key});
@@ -75,8 +76,20 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
       final String savedPath = '${directory.path}/$fileName';
       await File(image.path).copy(savedPath);
 
-      // Calculate tax saving (simplified - 20% of amount for demo)
-      final double taxSaving = TaxCalculationService.calculatePotentialSaving(amount);
+      // Calculate tax saving based on user profile, if available
+      final profileService = ProfileService();
+      final userProfile = await profileService.getProfile();
+
+      final double taxSaving;
+      if (userProfile != null) {
+        taxSaving = TaxCalculationService.calculateSavingWithProfile(
+          amount,
+          userProfile.incomeBracket,
+          userProfile.filingStatus,
+        );
+      } else {
+        taxSaving = TaxCalculationService.calculatePotentialSaving(amount);
+      }
 
       // Create receipt object
       final receipt = Receipt(
