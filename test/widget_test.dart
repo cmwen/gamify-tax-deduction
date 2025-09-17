@@ -1,11 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gamified_tax_deduction/main.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
+  // Initialize the FFI database factory for tests
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
+
   testWidgets('App starts and displays dashboard', (WidgetTester tester) async {
-    // Ensure Flutter binding is initialized for database operations
-    TestWidgetsFlutterBinding.ensureInitialized();
-    
     // Build our app and trigger a frame.
     await tester.pumpWidget(const GamifiedTaxDeductionApp());
     

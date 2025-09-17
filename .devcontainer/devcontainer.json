@@ -1,0 +1,20 @@
+{
+    "name": "Flutter Dev Container",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "Dart-Code.flutter",
+                "Dart-Code.dart-code",
+                "eamodio.gitlens"
+            ],
+            "settings": {
+                "dart.flutterSdkPath": "/home/jules/flutter"
+            }
+        }
+    },
+    "postCreateCommand": "flutter pub get",
+    "remoteUser": "jules"
+}

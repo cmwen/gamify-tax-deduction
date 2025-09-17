@@ -1,5 +1,5 @@
-/// Data models for the Gamified Tax Deduction app
-/// Following the design document specifications
+// Data models for the Gamified Tax Deduction app
+// Following the design document specifications
 
 class UserProfile {
   final String incomeBracket; // 'low' | 'medium' | 'high'
