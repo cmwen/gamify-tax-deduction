@@ -47,6 +47,13 @@ class DatabaseHelper {
         unlockedAt TEXT
       )
     ''');
+    await db.execute('''
+      CREATE TABLE user_profile(
+        id TEXT PRIMARY KEY,
+        filingStatus TEXT NOT NULL,
+        incomeBracket TEXT NOT NULL
+      )
+    ''');
     await _initializeAchievements(db);
   }
 

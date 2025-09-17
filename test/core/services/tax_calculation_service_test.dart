@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gamified_tax_deduction/core/models/user_profile.dart';
 import 'package:gamified_tax_deduction/core/services/tax_calculation_service.dart';
 
 void main() {
@@ -15,27 +16,21 @@ void main() {
 
       // Test low income bracket
       final lowResult = TaxCalculationService.calculateSavingWithProfile(
-        amount, 'low', 'single'
+        amount, IncomeBracket.low, FilingStatus.single
       );
       expect(lowResult, 12.0);
 
       // Test medium income bracket
       final mediumResult = TaxCalculationService.calculateSavingWithProfile(
-        amount, 'medium', 'single'
+        amount, IncomeBracket.middle, FilingStatus.single
       );
       expect(mediumResult, 22.0);
 
       // Test high income bracket
       final highResult = TaxCalculationService.calculateSavingWithProfile(
-        amount, 'high', 'single'
+        amount, IncomeBracket.high, FilingStatus.single
       );
       expect(highResult, 32.0);
-
-      // Test default case
-      final defaultResult = TaxCalculationService.calculateSavingWithProfile(
-        amount, 'unknown', 'single'
-      );
-      expect(defaultResult, 22.0);
     });
   });
 }
