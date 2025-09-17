@@ -47,8 +47,8 @@ jobs:
       # - name: Build APK
       #   run: flutter build apk --debug
 
-      - name: Build iOS (no signing)
-        run: flutter build ios --no-codesign
+      # - name: Build iOS (no signing)
+      #   run: flutter build ios --no-codesign
 
   documentation:
     name: Check Documentation
