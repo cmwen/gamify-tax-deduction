@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/data_models.dart';
+import '../models/achievement.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -37,6 +38,23 @@ class DatabaseHelper {
         category TEXT
       )
     ''');
+    await db.execute('''
+      CREATE TABLE achievements(
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        unlocked INTEGER NOT NULL,
+        unlockedAt TEXT
+      )
+    ''');
+    await _initializeAchievements(db);
+  }
+
+  Future<void> _initializeAchievements(Database db) async {
+    for (var achievement in Achievements.all) {
+      await db.insert('achievements', achievement.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
   }
 
   Future<int> insertReceipt(Receipt receipt) async {
@@ -66,5 +84,23 @@ class DatabaseHelper {
     final db = await database;
     final result = await db.rawQuery('SELECT COUNT(*) as count FROM receipts');
     return result.first['count'] as int? ?? 0;
+  }
+
+  Future<List<Achievement>> getAchievements() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('achievements');
+    return List.generate(maps.length, (i) {
+      return Achievement.fromMap(maps[i]);
+    });
+  }
+
+  Future<void> updateAchievement(Achievement achievement) async {
+    final db = await database;
+    await db.update(
+      'achievements',
+      achievement.toMap(),
+      where: 'id = ?',
+      whereArgs: [achievement.id],
+    );
   }
 }

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:gamified_tax_deduction/core/services/achievement_service.dart';
+import 'package:provider/provider.dart';
 import '../../core/database/database_helper.dart';
 import '../../core/models/data_models.dart';
 import '../receipt_scanner/receipt_scanner_screen.dart';
 import '../profile/profile_screen.dart';
+import '../achievements/achievements_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -20,6 +23,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     _loadDashboardData();
+    // Also check achievements on initial load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAchievements();
+    });
   }
 
   Future<void> _loadDashboardData() async {
@@ -32,6 +39,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       receiptCount = count;
       recentReceipts = receipts.take(5).toList();
     });
+    _checkAchievements();
+  }
+
+  void _checkAchievements() {
+    Provider.of<AchievementService>(context, listen: false)
+        .checkAchievements(receiptCount, totalSavings);
   }
 
   @override
@@ -41,6 +54,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text('Tax Deduction Tracker'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.emoji_events),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AchievementsScreen(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
