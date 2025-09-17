@@ -1,5 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gamified_tax_deduction/core/database/database_helper.dart';
+import 'package:gamified_tax_deduction/core/services/achievement_service.dart';
 import 'package:gamified_tax_deduction/main.dart';
+import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
@@ -9,7 +12,13 @@ void main() {
 
   testWidgets('App starts and displays dashboard', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const GamifiedTaxDeductionApp());
+    final dbHelper = DatabaseHelper.instance;
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (context) => AchievementService(dbHelper: dbHelper),
+        child: const GamifiedTaxDeductionApp(),
+      ),
+    );
     
     // Pump and settle to wait for async operations to complete
     await tester.pumpAndSettle();

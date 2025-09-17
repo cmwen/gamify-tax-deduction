@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:gamified_tax_deduction/features/dashboard/dashboard_screen.dart';
 import 'package:gamified_tax_deduction/core/database/database_helper.dart';
+import 'package:gamified_tax_deduction/core/services/achievement_service.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize database
-  await DatabaseHelper.instance.database;
+  final dbHelper = DatabaseHelper.instance;
+  await dbHelper.database;
   
-  runApp(const GamifiedTaxDeductionApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => AchievementService(dbHelper: dbHelper),
+      child: const GamifiedTaxDeductionApp(),
+    ),
+  );
 }
 
 class GamifiedTaxDeductionApp extends StatelessWidget {

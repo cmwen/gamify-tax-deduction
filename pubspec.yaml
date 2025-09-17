@@ -19,6 +19,7 @@ dependencies:
   camera: ^0.10.5+5
   flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.2
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:
@@ -27,6 +28,8 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   sqflite_common_ffi: ^2.3.0
+  mockito: ^5.4.4
+  build_runner: ^2.4.10
 
 flutter:
   uses-material-design: true
