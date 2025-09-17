@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gamified_tax_deduction/core/services/achievement_service.dart';
 import 'package:provider/provider.dart';
-import 'package:gamified_tax_deduction/core/models/achievement.dart';
 
 class AchievementsScreen extends StatelessWidget {
   const AchievementsScreen({super.key});

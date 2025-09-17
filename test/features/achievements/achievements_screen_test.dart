@@ -5,8 +5,6 @@ import 'package:gamified_tax_deduction/core/services/achievement_service.dart';
 import 'package:gamified_tax_deduction/features/achievements/achievements_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:mockito/mockito.dart';
-import 'package:gamified_tax_deduction/core/database/database_helper.dart';
-import 'package:mockito/annotations.dart';
 import '../../core/services/achievement_service_test.mocks.dart';
 
 void main() {
