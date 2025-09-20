@@ -8,6 +8,7 @@ void main() {
         id: 'test',
         name: 'Test',
         description: 'A test achievement',
+        imageUrl: 'assets/images/test.png',
       );
 
       final unlockedAchievement = achievement.copyWith(
@@ -26,6 +27,7 @@ void main() {
         id: 'test',
         name: 'Test',
         description: 'A test achievement',
+        imageUrl: 'assets/images/test.png',
         unlocked: true,
         unlockedAt: now,
       );

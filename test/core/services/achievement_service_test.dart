@@ -27,8 +27,8 @@ void main() {
     });
 
     test('checkAchievements unlocks "first_receipt"', () async {
-      final achievements = [
-        Achievement(id: 'first_receipt', name: 'First', description: '...'),
+      final List<Achievement> achievements = [
+        Achievement(id: 'first_receipt', name: 'First', description: '...', imageUrl: 'assets/images/first.png'),
       ];
       // The service will load these achievements
       when(mockDbHelper.getAchievements()).thenAnswer((_) async => achievements);
@@ -46,8 +46,8 @@ void main() {
     });
 
     test('checkAchievements unlocks "ten_receipts"', () async {
-      final achievements = [
-        Achievement(id: 'ten_receipts', name: 'Ten', description: '...'),
+      final List<Achievement> achievements = [
+        Achievement(id: 'ten_receipts', name: 'Ten', description: '...', imageUrl: 'assets/images/ten.png'),
       ];
       when(mockDbHelper.getAchievements()).thenAnswer((_) async => achievements);
       when(mockDbHelper.updateAchievement(any)).thenAnswer((_) async {});
@@ -62,8 +62,8 @@ void main() {
     });
 
     test('checkAchievements does not unlock already unlocked achievements', () async {
-       final achievements = [
-        Achievement(id: 'first_receipt', name: 'First', description: '...', unlocked: true),
+       final List<Achievement> achievements = [
+        Achievement(id: 'first_receipt', name: 'First', description: '...', unlocked: true, imageUrl: 'assets/images/first.png'),
       ];
       when(mockDbHelper.getAchievements()).thenAnswer((_) async => achievements);
 

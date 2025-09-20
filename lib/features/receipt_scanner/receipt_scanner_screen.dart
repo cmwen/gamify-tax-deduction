@@ -4,6 +4,7 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:lottie/lottie.dart';
 import '../../core/database/database_helper.dart';
 import '../../core/models/data_models.dart';
 import '../../core/services/tax_calculation_service.dart';
@@ -222,11 +223,7 @@ class RewardScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.check_circle,
-              size: 100,
-              color: Colors.green,
-            ),
+            Lottie.asset('assets/animations/reward.json'),
             const SizedBox(height: 24),
             const Text(
               'Nice!',
