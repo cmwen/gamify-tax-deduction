@@ -110,4 +110,50 @@ class DatabaseHelper {
       whereArgs: [achievement.id],
     );
   }
+
+  Future<int> getScanningStreak() async {
+    final db = await database;
+    final receipts = await db.query('receipts', orderBy: 'createdAt DESC');
+    if (receipts.isEmpty) {
+      return 0;
+    }
+
+    Set<DateTime> uniqueDates = {};
+    for (var receipt in receipts) {
+      final createdAt = DateTime.parse(receipt['createdAt'] as String);
+      uniqueDates.add(DateTime(createdAt.year, createdAt.month, createdAt.day));
+    }
+
+    List<DateTime> sortedDates = uniqueDates.toList()..sort((a, b) => b.compareTo(a));
+
+    DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    DateTime yesterday = today.subtract(const Duration(days: 1));
+
+    if (sortedDates.first != today && sortedDates.first != yesterday) {
+      return 0;
+    }
+
+    int streak = 1;
+    for (int i = 0; i < sortedDates.length - 1; i++) {
+      if (sortedDates[i].difference(sortedDates[i+1]).inDays == 1) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  Future<int> getReceiptsScannedThisMonth() async {
+    final db = await database;
+    final now = DateTime.now();
+    final firstDayOfMonth = DateTime(now.year, now.month, 1);
+    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM receipts WHERE createdAt >= ? AND createdAt <= ?',
+      [firstDayOfMonth.toIso8601String(), lastDayOfMonth.toIso8601String()],
+    );
+    return result.first['count'] as int? ?? 0;
+  }
 }

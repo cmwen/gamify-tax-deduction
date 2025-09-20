@@ -26,22 +26,24 @@ void main() {
     );
   }
 
-  testWidgets('shows loading indicator initially', (WidgetTester tester) async {
+  testWidgets('shows no achievements message initially', (WidgetTester tester) async {
     when(mockDbHelper.getAchievements()).thenAnswer((_) async => []);
     await tester.pumpWidget(createWidgetUnderTest());
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text("No achievements defined yet."), findsOneWidget);
   });
 
   testWidgets('displays achievements after loading',
       (WidgetTester tester) async {
-    final achievements = [
+    final List<Achievement> achievements = [
       Achievement(
           id: 'a1',
           name: 'Achievement 1',
           description: 'Desc 1',
+          imageUrl: 'assets/images/a1.png',
           unlocked: true,
           unlockedAt: DateTime.now()),
-      Achievement(id: 'a2', name: 'Achievement 2', description: 'Desc 2'),
+      Achievement(id: 'a2', name: 'Achievement 2', description: 'Desc 2', imageUrl: 'assets/images/a2.png'),
     ];
     when(mockDbHelper.getAchievements()).thenAnswer((_) async => achievements);
 
