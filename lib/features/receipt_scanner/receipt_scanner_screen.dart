@@ -6,8 +6,10 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../../core/database/database_helper.dart';
 import '../../core/models/data_models.dart';
+import '../../core/models/educational_tip.dart';
 import '../../core/services/tax_calculation_service.dart';
 import '../../core/services/profile_service.dart';
+import '../educational/educational_tip_widgets.dart';
 
 class ReceiptScannerScreen extends StatefulWidget {
   const ReceiptScannerScreen({super.key});
@@ -212,39 +214,87 @@ class RewardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final randomTip = EducationalTips.getRandomTip();
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Receipt Saved!'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        automaticallyImplyLeading: false,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.check_circle,
-              size: 100,
-              color: Colors.green,
+            const SizedBox(height: 32),
+            
+            // Success icon
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_circle,
+                size: 80,
+                color: Colors.green,
+              ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
+            
+            // Success message
             const Text(
               'Nice!',
               style: TextStyle(
-                fontSize: 32,
+                fontSize: 36,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              'You\'ve unlocked \$${taxSaving.toStringAsFixed(2)} in potential tax savings!',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
+            
+            // Tax savings highlight
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.green.shade200, width: 2),
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    'You\'ve unlocked',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '\$${taxSaving.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'in potential tax savings!',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
+            
+            // Receipt amount
             Text(
               'Receipt amount: \$${amount.toStringAsFixed(2)}',
               style: const TextStyle(
@@ -252,11 +302,26 @@ class RewardScreen extends StatelessWidget {
                 color: Colors.grey,
               ),
             ),
-            const SizedBox(height: 48),
+            const SizedBox(height: 8),
+            const Text(
+              'Estimate Only - Not Tax Advice',
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 32),
+            
+            // Educational tip
+            EducationalTipCard(tip: randomTip),
+            const SizedBox(height: 32),
+            
+            // Action buttons
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton(
+                  child: OutlinedButton.icon(
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
@@ -265,20 +330,26 @@ class RewardScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    child: const Text('Scan Another'),
+                    icon: const Icon(Icons.camera_alt),
+                    label: const Text('Scan Another'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: ElevatedButton(
+                  child: ElevatedButton.icon(
                     onPressed: () {
                       Navigator.popUntil(context, (route) => route.isFirst);
                     },
+                    icon: const Icon(Icons.home),
+                    label: const Text('Done'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const Text('Done'),
                   ),
                 ),
               ],

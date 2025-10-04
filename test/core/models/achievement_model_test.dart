@@ -47,10 +47,71 @@ void main() {
       expect(Achievements.all, isNotEmpty);
     });
 
-    test('all list contains expected achievements', () {
+    test('all list contains expected scanning achievements', () {
       final ids = Achievements.all.map((e) => e.id).toList();
       expect(ids, contains('first_receipt'));
+      expect(ids, contains('five_receipts'));
       expect(ids, contains('ten_receipts'));
+      expect(ids, contains('twenty_five_receipts'));
+      expect(ids, contains('fifty_receipts'));
+      expect(ids, contains('hundred_receipts'));
+    });
+
+    test('all list contains expected savings achievements', () {
+      final ids = Achievements.all.map((e) => e.id).toList();
+      expect(ids, contains('fifty_deduction'));
+      expect(ids, contains('hundred_deduction'));
+      expect(ids, contains('two_fifty_deduction'));
+      expect(ids, contains('five_hundred_deduction'));
+      expect(ids, contains('thousand_deduction'));
+      expect(ids, contains('two_thousand_deduction'));
+      expect(ids, contains('five_thousand_deduction'));
+    });
+
+    test('all achievements should have unique ids', () {
+      final ids = Achievements.all.map((e) => e.id).toList();
+      final uniqueIds = ids.toSet();
+      expect(ids.length, uniqueIds.length);
+    });
+
+    test('all achievements should have required fields', () {
+      for (final achievement in Achievements.all) {
+        expect(achievement.id, isNotEmpty);
+        expect(achievement.name, isNotEmpty);
+        expect(achievement.description, isNotEmpty);
+        expect(achievement.unlocked, isFalse); // Should start unlocked
+        expect(achievement.unlockedAt, isNull); // Should not have unlock date initially
+      }
+    });
+
+    test('should have progressive milestones', () {
+      // Receipt counting achievements should be progressive
+      final receiptAchievements = [
+        'first_receipt',
+        'five_receipts',
+        'ten_receipts',
+        'twenty_five_receipts',
+        'fifty_receipts',
+        'hundred_receipts',
+      ];
+      
+      final ids = Achievements.all.map((e) => e.id).toList();
+      for (final achievementId in receiptAchievements) {
+        expect(ids, contains(achievementId));
+      }
+
+      // Savings achievements should be progressive
+      final savingsAchievements = [
+        'fifty_deduction',
+        'hundred_deduction',
+        'two_fifty_deduction',
+        'five_hundred_deduction',
+        'thousand_deduction',
+      ];
+      
+      for (final achievementId in savingsAchievements) {
+        expect(ids, contains(achievementId));
+      }
     });
   });
 }

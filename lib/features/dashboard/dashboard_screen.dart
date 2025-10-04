@@ -3,9 +3,12 @@ import 'package:gamified_tax_deduction/core/services/achievement_service.dart';
 import 'package:provider/provider.dart';
 import '../../core/database/database_helper.dart';
 import '../../core/models/data_models.dart';
+import '../../core/models/educational_tip.dart';
 import '../receipt_scanner/receipt_scanner_screen.dart';
 import '../profile/profile_screen.dart';
 import '../achievements/achievements_screen.dart';
+import '../achievements/achievement_notification.dart';
+import '../educational/educational_tip_widgets.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -18,6 +21,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   double totalSavings = 0.0;
   int receiptCount = 0;
   List<Receipt> recentReceipts = [];
+  bool _showTipOfTheDay = true;
 
   @override
   void initState() {
@@ -39,7 +43,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
       receiptCount = count;
       recentReceipts = receipts.take(5).toList();
     });
-    _checkAchievements();
+    
+    // Check for newly unlocked achievements
+    await _checkAndShowAchievements();
+  }
+
+  Future<void> _checkAndShowAchievements() async {
+    final achievementService = Provider.of<AchievementService>(context, listen: false);
+    final newAchievements = await achievementService.checkAchievements(receiptCount, totalSavings);
+    
+    // Show notifications for newly unlocked achievements
+    if (mounted && newAchievements.isNotEmpty) {
+      for (final achievement in newAchievements) {
+        await AchievementUnlockedDialog.show(context, achievement);
+      }
+      achievementService.clearNewlyUnlocked();
+    }
   }
 
   void _checkAchievements() {
@@ -55,6 +74,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
+            icon: const Icon(Icons.lightbulb_outline),
+            onPressed: () => EducationalTipsSheet.show(context),
+            tooltip: 'Tax Tips',
+          ),
+          IconButton(
             icon: const Icon(Icons.emoji_events),
             onPressed: () {
               Navigator.push(
@@ -64,6 +88,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               );
             },
+            tooltip: 'Achievements',
           ),
           IconButton(
             icon: const Icon(Icons.person),
@@ -75,6 +100,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               );
             },
+            tooltip: 'Profile',
           ),
         ],
       ),
@@ -85,6 +111,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             // Main savings display
             Card(
+              elevation: 4,
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
@@ -103,6 +130,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         fontSize: 36,
                         fontWeight: FontWeight.bold,
                         color: Colors.green,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Estimate Only - Not Tax Advice',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -131,9 +167,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+
+            // Tip of the Day
+            if (_showTipOfTheDay)
+              EducationalTipCard(
+                tip: EducationalTips.getRandomTip(),
+                onDismiss: () {
+                  setState(() {
+                    _showTipOfTheDay = false;
+                  });
+                },
+              ),
+            if (_showTipOfTheDay) const SizedBox(height: 16),
             
-            // Gamification section
+            // Gamification section with progress
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -155,36 +203,69 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Text('$receiptCount receipts tracked'),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(Icons.savings, color: Colors.orange),
-                        const SizedBox(width: 8),
-                        Text('\$${totalSavings.toStringAsFixed(2)} potential savings'),
-                      ],
+                    const SizedBox(height: 12),
+                    
+                    // Progress bar toward next milestone
+                    _buildProgressBar(
+                      context,
+                      'Next Milestone: \$${_getNextMilestone(totalSavings).toStringAsFixed(0)}',
+                      totalSavings,
+                      _getNextMilestone(totalSavings),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             
             // Recent receipts
-            const Text(
-              'Recent Receipts',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Recent Receipts',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (recentReceipts.isNotEmpty)
+                  TextButton.icon(
+                    onPressed: () {
+                      // Future: Navigate to full receipt list
+                    },
+                    icon: const Icon(Icons.list, size: 18),
+                    label: const Text('View All'),
+                  ),
+              ],
             ),
             const SizedBox(height: 8),
             Expanded(
               child: recentReceipts.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'No receipts yet. Scan your first receipt to get started!',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16),
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.receipt_long,
+                            size: 64,
+                            color: Colors.grey.shade300,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'No receipts yet',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Scan your first receipt to start\ntracking your tax savings!',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                        ],
                       ),
                     )
                   : ListView.builder(
@@ -193,13 +274,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         final receipt = recentReceipts[index];
                         return Card(
                           child: ListTile(
-                            leading: const Icon(Icons.receipt),
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.green.shade100,
+                              child: const Icon(
+                                Icons.receipt,
+                                color: Colors.green,
+                              ),
+                            ),
                             title: Text(receipt.vendorName ?? 'Unknown Vendor'),
                             subtitle: Text(
-                              '\$${receipt.totalAmount.toStringAsFixed(2)} - Potential saving: \$${receipt.potentialTaxSaving.toStringAsFixed(2)}',
+                              '\$${receipt.totalAmount.toStringAsFixed(2)} - Saves: \$${receipt.potentialTaxSaving.toStringAsFixed(2)}',
                             ),
-                            trailing: Text(
-                              '${receipt.createdAt.day}/${receipt.createdAt.month}',
+                            trailing: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '${receipt.createdAt.month}/${receipt.createdAt.day}',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                Text(
+                                  '${receipt.createdAt.year}',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         );
@@ -210,5 +311,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildProgressBar(
+    BuildContext context,
+    String label,
+    double current,
+    double target,
+  ) {
+    final progress = target > 0 ? (current / target).clamp(0.0, 1.0) : 0.0;
+    final percentage = (progress * 100).toInt();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            ),
+            Text(
+              '$percentage%',
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: progress,
+            minHeight: 8,
+            backgroundColor: Colors.grey.shade200,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              progress >= 1.0 ? Colors.green : Colors.orange,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  double _getNextMilestone(double current) {
+    const milestones = [100.0, 250.0, 500.0, 1000.0, 1500.0, 2000.0, 3000.0, 5000.0];
+    for (final milestone in milestones) {
+      if (current < milestone) {
+        return milestone;
+      }
+    }
+    return (current / 1000).ceil() * 1000 + 1000; // Next thousand
   }
 }
