@@ -3,11 +3,9 @@ import 'package:gamified_tax_deduction/core/database/database_helper.dart';
 import 'package:gamified_tax_deduction/core/models/achievement.dart';
 import 'package:gamified_tax_deduction/core/services/achievement_service.dart';
 import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 
 import 'achievement_service_test.mocks.dart';
 
-@GenerateMocks([DatabaseHelper])
 void main() {
   late MockDatabaseHelper mockDbHelper;
   late AchievementService achievementService;
