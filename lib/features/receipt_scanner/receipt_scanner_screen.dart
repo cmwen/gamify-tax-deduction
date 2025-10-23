@@ -83,6 +83,8 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
       // Close the initial loading dialog before entering the review flow
       if (mounted) Navigator.pop(context);
 
+      if (!mounted) return;
+
       final reviewResult = await Navigator.push<ReceiptReviewResult?>(
         context,
         MaterialPageRoute(
@@ -95,9 +97,13 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
       );
 
       if (reviewResult == null) {
-        await File(savedPath).delete().catchError((_) {});
+        try {
+          await File(savedPath).delete();
+        } catch (_) {}
         return;
       }
+
+      if (!mounted) return;
 
       if (mounted) {
         showDialog(

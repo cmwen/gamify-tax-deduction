@@ -158,7 +158,7 @@ class _ReceiptReviewScreenState extends State<ReceiptReviewScreen> {
                     labelText: 'Category (optional)',
                     border: OutlineInputBorder(),
                   ),
-                  value: _selectedCategory,
+                  initialValue: _selectedCategory,
                   items: _categories
                       .map(
                         (category) => DropdownMenuItem(

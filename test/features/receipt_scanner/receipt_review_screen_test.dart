@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gamified_tax_deduction/features/receipt_scanner/receipt_review_screen.dart';
 
 void main() {
-  Future<void> _pumpScreen(
+  Future<void> pumpScreen(
     WidgetTester tester, {
     required double amount,
     String? vendor,
@@ -21,7 +21,7 @@ void main() {
   }
 
   testWidgets('prefills amount and vendor from OCR results', (tester) async {
-    await _pumpScreen(tester, amount: 42.5, vendor: 'Coffee Shop');
+    await pumpScreen(tester, amount: 42.5, vendor: 'Coffee Shop');
 
     final amountField = tester.widget<TextFormField>(
       find.byType(TextFormField).first,
@@ -35,7 +35,7 @@ void main() {
   });
 
   testWidgets('shows validation error when amount is empty', (tester) async {
-    await _pumpScreen(tester, amount: 10, vendor: null);
+    await pumpScreen(tester, amount: 10, vendor: null);
 
     final amountFinder = find.byType(TextFormField).first;
     await tester.enterText(amountFinder, '');
