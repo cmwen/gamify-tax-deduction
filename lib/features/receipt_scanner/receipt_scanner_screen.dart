@@ -10,6 +10,7 @@ import '../../core/models/educational_tip.dart';
 import '../../core/services/tax_calculation_service.dart';
 import '../../core/services/profile_service.dart';
 import '../educational/educational_tip_widgets.dart';
+import 'receipt_review_screen.dart';
 
 class ReceiptScannerScreen extends StatefulWidget {
   const ReceiptScannerScreen({super.key});
@@ -69,14 +70,44 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
       final inputImage = InputImage.fromFilePath(image.path);
       final RecognizedText recognizedText = await _textRecognizer.processImage(inputImage);
       
-      // Extract amount from text
-      double amount = _extractAmountFromText(recognizedText.text);
+      // Extract amount and vendor from text
+      final double amount = _extractAmountFromText(recognizedText.text);
+      final String? vendorName = _extractVendorFromText(recognizedText.text);
       
       // Save image to app directory
       final directory = await getApplicationDocumentsDirectory();
       final String fileName = '${const Uuid().v4()}.jpg';
       final String savedPath = '${directory.path}/$fileName';
       await File(image.path).copy(savedPath);
+
+      // Close the initial loading dialog before entering the review flow
+      if (mounted) Navigator.pop(context);
+
+      final reviewResult = await Navigator.push<ReceiptReviewResult?>(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ReceiptReviewScreen(
+            initialAmount: amount,
+            initialVendorName: vendorName,
+            imagePath: savedPath,
+          ),
+        ),
+      );
+
+      if (reviewResult == null) {
+        await File(savedPath).delete().catchError((_) {});
+        return;
+      }
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
 
       // Calculate tax saving based on user profile, if available
       final profileService = ProfileService();
@@ -85,12 +116,12 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
       final double taxSaving;
       if (userProfile != null) {
         taxSaving = TaxCalculationService.calculateSavingWithProfile(
-          amount,
+          reviewResult.amount,
           userProfile.incomeBracket,
           userProfile.filingStatus,
         );
       } else {
-        taxSaving = TaxCalculationService.calculatePotentialSaving(amount);
+        taxSaving = TaxCalculationService.calculatePotentialSaving(reviewResult.amount);
       }
 
       // Create receipt object
@@ -98,14 +129,16 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
         id: const Uuid().v4(),
         createdAt: DateTime.now(),
         imagePath: savedPath,
-        totalAmount: amount,
+        vendorName: reviewResult.vendorName,
+        totalAmount: reviewResult.amount,
         potentialTaxSaving: taxSaving,
+        category: reviewResult.category,
       );
 
       // Save to database
       await DatabaseHelper.instance.insertReceipt(receipt);
 
-      // Close loading dialog
+      // Close persistence progress dialog
       if (mounted) Navigator.pop(context);
 
       // Show reward screen
@@ -114,8 +147,10 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => RewardScreen(
-              amount: amount,
+              amount: reviewResult.amount,
               taxSaving: taxSaving,
+              vendorName: reviewResult.vendorName,
+              category: reviewResult.category,
             ),
           ),
         );
@@ -150,6 +185,26 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     }
     
     return maxAmount > 0 ? maxAmount : 25.99; // Default demo amount
+  }
+
+  String? _extractVendorFromText(String text) {
+    final lines = text.split('\n');
+    for (final rawLine in lines) {
+      final line = rawLine.trim();
+      if (line.isEmpty) continue;
+      if (line.length < 3) continue;
+      final hasLetters = RegExp(r'[A-Za-z]').hasMatch(line);
+      if (!hasLetters) continue;
+      final containsAmountKeyword =
+          RegExp(r'(total|subtotal|amount|change)', caseSensitive: false).hasMatch(line);
+      if (containsAmountKeyword) continue;
+      // Skip lines that look like amounts
+      if (RegExp(r'[0-9]').hasMatch(line) && RegExp(r'\$|[0-9]+\.[0-9]{2}').hasMatch(line)) {
+        continue;
+      }
+      return line.length > 40 ? line.substring(0, 40) : line;
+    }
+    return null;
   }
 
   @override
@@ -205,11 +260,15 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
 class RewardScreen extends StatelessWidget {
   final double amount;
   final double taxSaving;
+  final String? vendorName;
+  final String? category;
 
   const RewardScreen({
     super.key,
     required this.amount,
     required this.taxSaving,
+    this.vendorName,
+    this.category,
   });
 
   @override
@@ -294,6 +353,26 @@ class RewardScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             
+            if (vendorName != null && vendorName!.isNotEmpty) ...[
+              Text(
+                vendorName!,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            if (category != null && category!.isNotEmpty) ...[
+              Text(
+                'Category: ${formatCategoryLabel(category!)}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
             // Receipt amount
             Text(
               'Receipt amount: \$${amount.toStringAsFixed(2)}',

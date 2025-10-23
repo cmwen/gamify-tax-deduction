@@ -36,6 +36,7 @@
 #### Core Functionality (MVP)
 - ✅ Receipt scanning with camera integration
 - ✅ On-device OCR using Google ML Kit
+- ✅ Guided review screen to confirm totals, vendor, and category before saving
 - ✅ Local SQLite database for secure storage
 - ✅ Tax savings calculation based on user profile
 - ✅ User profile setup (income bracket, filing status)
@@ -54,9 +55,11 @@
 - ✅ Full tips library accessible via lightbulb icon
 - ✅ Tips cover: business meals, home office, equipment, mileage, supplies, professional services, education, and record keeping
 
+- ✅ Full receipt history screen with pull-to-refresh and chronological sorting
+
 #### User Experience Enhancements
 - ✅ Enhanced dashboard with better visual hierarchy
-- ✅ Improved receipt list with detailed information
+- ✅ Improved recent receipts module with vendor/category context
 - ✅ Rewarding receipt save confirmation screen
 - ✅ Comprehensive disclaimers for tax estimates
 - ✅ Empty states with helpful guidance

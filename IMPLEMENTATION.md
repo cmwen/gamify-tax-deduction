@@ -125,19 +125,27 @@ This document summarizes the features implemented for the Gamified Tax Deduction
 
 ### 4. Receipt Scanner Improvements
 
-#### Files Modified:
-- `lib/features/receipt_scanner/receipt_scanner_screen.dart` - Enhanced reward screen
+#### Files Modified / Added:
+- `lib/features/receipt_scanner/receipt_scanner_screen.dart` - Flow overhaul
+- `lib/features/receipt_scanner/receipt_review_screen.dart` - **New** confirmation UI
 
-#### Reward Screen Features:
-- Larger, more prominent success icon with circular background
-- Highlighted tax savings in dedicated card
-- Receipt amount display
-- Educational tip integration
-- Improved button layout with icons
-- Better spacing and visual hierarchy
-- Clear disclaimers about estimate nature
+#### Receipt Flow Enhancements:
+- Added guided review screen so users can edit amount, vendor, and optional category before saving.
+- Implemented vendor name heuristics from OCR output to pre-fill review form.
+- Wrapped persistence in explicit progress UI and ensured receipt images are cleaned up when the user cancels.
+- Expanded reward screen to surface vendor/category context.
 
-### 5. Testing Infrastructure
+### 5. Receipt History & Navigation
+
+#### Files Added:
+- `lib/features/receipts/receipt_list_screen.dart` - **New** full history view
+
+#### Highlights:
+- Chronologically sorted receipts with savings summary badges.
+- Pull-to-refresh support backed by database ordering.
+- Dashboard "View All" action now routes to the list and refreshes on return.
+
+### 6. Testing Infrastructure
 
 #### Test Files Created/Enhanced:
 - `test/core/models/educational_tip_test.dart` (New)
@@ -156,6 +164,12 @@ This document summarizes the features implemented for the Gamified Tax Deduction
   - Progressive milestone validation
   - Unique ID verification
   - Required fields validation
+- `test/core/services/achievement_service_test.dart` (Enhanced)
+  - Initialization waits covered via new guard test
+  - Removed reliance on microtask timing
+- `test/features/receipt_scanner/receipt_review_screen_test.dart` (New)
+  - Prefill validation for OCR-provided data
+  - Form validation error handling ensures UX feedback
 
 #### Test Coverage:
 - **Model Tests**: Educational tips, achievements, user profile, receipts
@@ -204,8 +218,6 @@ This document summarizes the features implemented for the Gamified Tax Deduction
 - **path_provider**: ^2.1.1 - File system access
 - **uuid**: ^4.1.0 - Unique IDs
 - **provider**: ^6.1.2 - State management
-- **flutter_secure_storage**: ^9.0.0 - Secure storage
-- **shared_preferences**: ^2.2.2 - Simple storage
 
 ### Dev Dependencies:
 - **flutter_test**: SDK - Testing framework
@@ -241,7 +253,11 @@ lib/
 │   ├── profile/
 │   │   └── profile_screen.dart
 │   └── receipt_scanner/
+│       ├── receipt_review_screen.dart (New)
 │       └── receipt_scanner_screen.dart (Enhanced)
+│
+├── features/receipts/
+│   └── receipt_list_screen.dart (New)
 └── main.dart
 
 test/

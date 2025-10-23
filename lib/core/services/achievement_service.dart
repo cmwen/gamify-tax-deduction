@@ -7,20 +7,33 @@ class AchievementService with ChangeNotifier {
   List<Achievement> _achievements = [];
   List<Achievement> _newlyUnlocked = [];
 
+  Future<void>? _initialization;
+  bool _isLoaded = false;
+
   List<Achievement> get achievements => _achievements;
   List<Achievement> get newlyUnlocked => _newlyUnlocked;
 
   AchievementService({required this.dbHelper}) {
-    _loadAchievements();
+    _initialization = _loadAchievements();
   }
 
   Future<void> _loadAchievements() async {
     _achievements = await dbHelper.getAchievements();
+    _isLoaded = true;
     notifyListeners();
+  }
+
+  Future<void> _ensureLoaded() async {
+    if (_isLoaded) {
+      return;
+    }
+    _initialization ??= _loadAchievements();
+    await _initialization;
   }
 
   /// Check achievements and return newly unlocked ones
   Future<List<Achievement>> checkAchievements(int receiptCount, double totalSavings) async {
+    await _ensureLoaded();
     _newlyUnlocked = [];
     bool wasUpdated = false;
     

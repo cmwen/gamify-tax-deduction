@@ -36,6 +36,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved empty state messaging with visual icons
   - Enhanced recent receipts display with better formatting
   - Added tooltips for all action buttons
+- **Receipt Workflow**
+  - Introduced a review screen to confirm totals, vendor, and category before saving
+  - Persisted vendor/category metadata and surfaced it on reward and history screens
+  - Added full receipt history view with pull-to-refresh and chronological sorting
 
 - **Receipt Scanner Improvements**
   - Redesigned reward screen with more engaging visual feedback
@@ -59,6 +63,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `clearNewlyUnlocked()` method for managing notification state
   - Enhanced achievement checking logic to support all 13 achievements
   - Improved notification system integration
+- **Receipt Persistence**
+  - Database queries now return receipts ordered by newest first for consistent UI state
+  - Dashboard refreshes automatically after returning from the receipt history view
+- **Achievement Initialization**
+  - Service now guarantees achievements are loaded before any unlock logic runs, preventing race conditions on first launch
 
 - **Dashboard Screen**
   - Restructured layout for better information hierarchy
@@ -80,6 +89,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved spacing and padding throughout the app
   - Better empty states with helpful guidance
   - Enhanced button styling with icons
+- **Documentation**
+  - Populated execution log and QA plan with actionable detail
+  - Governance traceability report updated to reflect resolved scaffolding gates
+
+### Removed
+- Deprecated TypeScript/Swift prototype scaffolding under `src/` and `tests/`
+- Dropped unused dependencies `flutter_secure_storage` and `shared_preferences` from the Flutter app configuration
 
 ### Technical Improvements
 - Created new `features/educational` module for educational content
