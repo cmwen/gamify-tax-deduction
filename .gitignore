@@ -152,4 +152,3 @@ vendor/bundle/
 /ios/Runner/GeneratedPluginRegistrant.*
 
 # Flutter Android
-/android/gradle.properties
