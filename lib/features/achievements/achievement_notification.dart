@@ -67,7 +67,7 @@ class AchievementUnlockedDialog extends StatelessWidget {
                 vertical: 8,
               ),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: Colors.white.withAlpha((0.2 * 255).round()),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(

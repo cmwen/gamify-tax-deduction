@@ -57,7 +57,7 @@ class AchievementsScreen extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: unlockedCount / totalCount,
                         minHeight: 10,
-                        backgroundColor: Colors.white.withValues(alpha: 0.3),
+                        backgroundColor: Colors.white.withAlpha((0.3 * 255).round()),
                         valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     ),
