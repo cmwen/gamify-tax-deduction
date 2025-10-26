@@ -22,6 +22,15 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+def hasReleaseKeystore = keystorePropertiesFile.exists()
+if (hasReleaseKeystore) {
+    keystorePropertiesFile.withReader('UTF-8') { reader ->
+        keystoreProperties.load(reader)
+    }
+}
+
 android {
     namespace "com.gamifiedtaxdeduction.app"
     compileSdk = 36
@@ -48,9 +57,23 @@ android {
         versionName flutterVersionName
     }
 
+    signingConfigs {
+        release {
+            if (hasReleaseKeystore) {
+                def storeFilePath = keystoreProperties['storeFile']
+                if (storeFilePath) {
+                    storeFile rootProject.file(storeFilePath)
+                }
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig hasReleaseKeystore ? signingConfigs.release : signingConfigs.debug
         }
     }
 }

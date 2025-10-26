@@ -66,3 +66,44 @@
 - ✅ Responsive design and smooth transitions
 
 For detailed documentation, see the `docs/` folder.
+
+## Android Release Automation
+
+### Configure Signing
+1. Generate a signing key once (update aliases/passwords as needed):
+   ```bash
+   keytool -genkeypair -v \
+     -keystore upload-keystore.jks \
+     -keyalg RSA -keysize 2048 -validity 10000 \
+     -alias gamifyTaxRelease
+   ```
+2. Base64‑encode the keystore so it can live in a GitHub secret:
+   ```bash
+   base64 upload-keystore.jks > upload-keystore.jks.base64
+   ```
+   (macOS users can pipe to `pbcopy` to copy it directly.)
+3. Create these repository secrets so the workflow can recreate the key at runtime:
+   - `ANDROID_KEYSTORE_BASE64` – contents of `upload-keystore.jks.base64`
+   - `ANDROID_KEYSTORE_PASSWORD` – keystore password entered above
+   - `ANDROID_KEY_ALIAS` – e.g. `gamifyTaxRelease`
+   - `ANDROID_KEY_PASSWORD` – key password (can match the keystore password)
+
+For local release builds, add an untracked `android/key.properties` file that matches:
+```
+storePassword=<ANDROID_KEYSTORE_PASSWORD>
+keyPassword=<ANDROID_KEY_PASSWORD>
+keyAlias=<ANDROID_KEY_ALIAS>
+storeFile=app/upload-keystore.jks
+```
+Then drop `upload-keystore.jks` in `android/app/`.
+
+### Build & Publish with GitHub Actions
+- Workflow: `.github/workflows/release-apk.yml`
+- Triggers: manual `workflow_dispatch` (build artifact only) or tags matching `v*` (build + publish GitHub Release).
+- Outputs: signed `app-release.apk` uploaded as an artifact, and when tagged, attached to the release automatically.
+
+Typical release flow:
+1. Bump app version in `pubspec.yaml`.
+2. Commit and push to `main`.
+3. Tag the commit (e.g. `git tag v1.2.0 && git push origin v1.2.0`).
+4. GitHub Actions builds the signed APK and publishes it in the tagged release.

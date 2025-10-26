@@ -77,6 +77,7 @@ out/
 # Keystore files
 *.jks
 *.keystore
+android/key.properties
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild
