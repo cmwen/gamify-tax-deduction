@@ -8,6 +8,7 @@ void main() {
         'id': 'test_id',
         'filingStatus': 'FilingStatus.single',
         'incomeBracket': 'IncomeBracket.middle',
+        'taxCountry': 'TaxCountry.unitedStates',
       };
 
       final profile = UserProfile.fromMap(map);
@@ -15,6 +16,7 @@ void main() {
       expect(profile.id, 'test_id');
       expect(profile.filingStatus, FilingStatus.single);
       expect(profile.incomeBracket, IncomeBracket.middle);
+      expect(profile.taxCountry, TaxCountry.unitedStates);
     });
 
     test('toMap creates a valid map from a UserProfile object', () {
@@ -22,6 +24,7 @@ void main() {
         id: 'test_id',
         filingStatus: FilingStatus.marriedFilingJointly,
         incomeBracket: IncomeBracket.high,
+        taxCountry: TaxCountry.australia,
       );
 
       final map = profile.toMap();
@@ -29,6 +32,7 @@ void main() {
       expect(map['id'], 'test_id');
       expect(map['filingStatus'], 'FilingStatus.marriedFilingJointly');
       expect(map['incomeBracket'], 'IncomeBracket.high');
+      expect(map['taxCountry'], 'TaxCountry.australia');
     });
   });
 }

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2025-10-26
+
+### Added
+- Country selector in the user profile to support Australian (ATO) and US (IRS) tax rules.
+- Country-specific deduction guidance with refreshed educational tips per tax authority.
+- Clear, descriptive labels for income brackets and filing statuses to help users choose the right option.
+
+### Changed
+- Tax savings calculations now apply country-aware marginal rates and filing adjustments.
+- Persisted user profile data includes the selected tax country with a database migration for existing installs.
+
 ### Added
 - **Educational Content System** (Story 3.2 - Educational Tooltips)
   - Created comprehensive educational tip model with 8 categorized tips

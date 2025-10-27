@@ -59,8 +59,8 @@ flutter build ios --no-codesign
 
 **Usage:**
 ```dart
-// Get random tip
-final tip = EducationalTips.getRandomTip();
+// Get random tip for current tax country
+final tip = EducationalTips.getRandomTip(profile.taxCountry);
 
 // Display tip card
 EducationalTipCard(tip: tip, onDismiss: () {})
@@ -69,7 +69,7 @@ EducationalTipCard(tip: tip, onDismiss: () {})
 EducationalTipDialog.show(context, tip);
 
 // Show bottom sheet with all tips
-EducationalTipsSheet.show(context);
+EducationalTipsSheet.show(context, country: profile.taxCountry);
 ```
 
 ### Achievement System

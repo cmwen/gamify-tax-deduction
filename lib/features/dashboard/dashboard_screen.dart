@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../core/database/database_helper.dart';
 import '../../core/models/data_models.dart';
 import '../../core/models/educational_tip.dart';
+import '../../core/models/user_profile.dart';
+import '../../core/services/profile_service.dart';
 import '../receipt_scanner/receipt_scanner_screen.dart';
 import '../profile/profile_screen.dart';
 import '../achievements/achievements_screen.dart';
@@ -23,6 +25,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int receiptCount = 0;
   List<Receipt> recentReceipts = [];
   bool _showTipOfTheDay = true;
+  final ProfileService _profileService = ProfileService();
+  UserProfile? _userProfile;
 
   @override
   void initState() {
@@ -38,11 +42,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final savings = await DatabaseHelper.instance.getTotalPotentialSavings();
     final count = await DatabaseHelper.instance.getReceiptCount();
     final receipts = await DatabaseHelper.instance.getAllReceipts();
-    
+    final profile = await _profileService.getOrCreateProfile();
+
     setState(() {
       totalSavings = savings;
       receiptCount = count;
       recentReceipts = receipts.take(5).toList();
+      _userProfile = profile;
     });
     
     // Check for newly unlocked achievements
@@ -69,6 +75,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final tipCountry = _userProfile?.taxCountry ?? TaxCountry.unitedStates;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tax Deduction Tracker'),
@@ -76,7 +84,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.lightbulb_outline),
-            onPressed: () => EducationalTipsSheet.show(context),
+            onPressed: () => EducationalTipsSheet.show(context, country: tipCountry),
             tooltip: 'Tax Tips',
           ),
           IconButton(
@@ -178,7 +186,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   // Tip of the Day
                   if (_showTipOfTheDay)
                     EducationalTipCard(
-                      tip: EducationalTips.getRandomTip(),
+                      tip: EducationalTips.getRandomTip(tipCountry),
                       onDismiss: () {
                         setState(() {
                           _showTipOfTheDay = false;
