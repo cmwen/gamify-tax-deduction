@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/models/educational_tip.dart';
+import '../../core/models/user_profile.dart';
 
 /// Widget that displays an educational tip in a card format
 class EducationalTipCard extends StatelessWidget {
@@ -104,18 +105,21 @@ class EducationalTipDialog extends StatelessWidget {
 
 /// Bottom sheet that displays multiple educational tips
 class EducationalTipsSheet extends StatelessWidget {
-  const EducationalTipsSheet({super.key});
+  final TaxCountry country;
+  const EducationalTipsSheet({super.key, required this.country});
 
-  static Future<void> show(BuildContext context) {
+  static Future<void> show(BuildContext context, {required TaxCountry country}) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => const EducationalTipsSheet(),
+      builder: (context) => EducationalTipsSheet(country: country),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final tips = EducationalTips.forCountry(country);
+
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
       minChildSize: 0.5,
@@ -163,10 +167,10 @@ class EducationalTipsSheet extends StatelessWidget {
               Expanded(
                 child: ListView.builder(
                   controller: scrollController,
-                  itemCount: EducationalTips.all.length,
+                  itemCount: tips.length,
                   padding: const EdgeInsets.all(16),
                   itemBuilder: (context, index) {
-                    final tip = EducationalTips.all[index];
+                    final tip = tips[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: EducationalTipCard(tip: tip),

@@ -9,6 +9,7 @@ import '../../core/models/data_models.dart';
 import '../../core/models/educational_tip.dart';
 import '../../core/services/tax_calculation_service.dart';
 import '../../core/services/profile_service.dart';
+import '../../core/models/user_profile.dart';
 import '../educational/educational_tip_widgets.dart';
 import 'receipt_review_screen.dart';
 
@@ -119,15 +120,21 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
       final profileService = ProfileService();
       final userProfile = await profileService.getProfile();
 
+      final taxCountry = userProfile?.taxCountry ?? TaxCountry.unitedStates;
+
       final double taxSaving;
       if (userProfile != null) {
         taxSaving = TaxCalculationService.calculateSavingWithProfile(
           reviewResult.amount,
           userProfile.incomeBracket,
           userProfile.filingStatus,
+          userProfile.taxCountry,
         );
       } else {
-        taxSaving = TaxCalculationService.calculatePotentialSaving(reviewResult.amount);
+        taxSaving = TaxCalculationService.calculatePotentialSaving(
+          reviewResult.amount,
+          country: taxCountry,
+        );
       }
 
       // Create receipt object
@@ -157,6 +164,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
               taxSaving: taxSaving,
               vendorName: reviewResult.vendorName,
               category: reviewResult.category,
+              country: taxCountry,
             ),
           ),
         );
@@ -268,6 +276,7 @@ class RewardScreen extends StatelessWidget {
   final double taxSaving;
   final String? vendorName;
   final String? category;
+  final TaxCountry country;
 
   const RewardScreen({
     super.key,
@@ -275,11 +284,12 @@ class RewardScreen extends StatelessWidget {
     required this.taxSaving,
     this.vendorName,
     this.category,
+    required this.country,
   });
 
   @override
   Widget build(BuildContext context) {
-    final randomTip = EducationalTips.getRandomTip();
+    final randomTip = EducationalTips.getRandomTip(country);
     
     return Scaffold(
       appBar: AppBar(

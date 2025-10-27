@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gamified_tax_deduction/core/models/educational_tip.dart';
+import 'package:gamified_tax_deduction/core/models/user_profile.dart';
 import 'package:gamified_tax_deduction/features/educational/educational_tip_widgets.dart';
 
 void main() {
@@ -153,7 +154,10 @@ void main() {
           home: Scaffold(
             body: Builder(
               builder: (context) => ElevatedButton(
-                onPressed: () => EducationalTipsSheet.show(context),
+                onPressed: () => EducationalTipsSheet.show(
+                  context,
+                  country: TaxCountry.unitedStates,
+                ),
                 child: const Text('Show Sheet'),
               ),
             ),
@@ -179,7 +183,10 @@ void main() {
           home: Scaffold(
             body: Builder(
               builder: (context) => ElevatedButton(
-                onPressed: () => EducationalTipsSheet.show(context),
+                onPressed: () => EducationalTipsSheet.show(
+                  context,
+                  country: TaxCountry.unitedStates,
+                ),
                 child: const Text('Show Sheet'),
               ),
             ),

@@ -39,6 +39,7 @@ class ProfileService {
         id: const Uuid().v4(),
         filingStatus: FilingStatus.single, // Default value
         incomeBracket: IncomeBracket.middle, // Default value
+        taxCountry: TaxCountry.unitedStates,
       );
       await saveProfile(newProfile);
       return newProfile;

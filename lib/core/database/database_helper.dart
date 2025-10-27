@@ -21,8 +21,9 @@ class DatabaseHelper {
     
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -51,10 +52,19 @@ class DatabaseHelper {
       CREATE TABLE user_profile(
         id TEXT PRIMARY KEY,
         filingStatus TEXT NOT NULL,
-        incomeBracket TEXT NOT NULL
+        incomeBracket TEXT NOT NULL,
+        taxCountry TEXT NOT NULL
       )
     ''');
     await _initializeAchievements(db);
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute(
+        "ALTER TABLE user_profile ADD COLUMN taxCountry TEXT NOT NULL DEFAULT 'TaxCountry.unitedStates'",
+      );
+    }
   }
 
   Future<void> _initializeAchievements(Database db) async {

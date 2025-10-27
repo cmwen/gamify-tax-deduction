@@ -26,6 +26,7 @@ void main() {
       id: 'test_id',
       filingStatus: FilingStatus.single,
       incomeBracket: IncomeBracket.middle,
+      taxCountry: TaxCountry.unitedStates,
     );
 
     test('saveProfile calls db.insert', () async {

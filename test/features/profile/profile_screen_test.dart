@@ -25,6 +25,7 @@ void main() {
     id: 'test_id',
     filingStatus: FilingStatus.single,
     incomeBracket: IncomeBracket.middle,
+    taxCountry: TaxCountry.unitedStates,
   );
 
   // Helper function to build the widget
@@ -38,8 +39,9 @@ void main() {
     await pumpScreen(tester);
     await tester.pumpAndSettle();
 
-    expect(find.text('single'), findsOneWidget);
-    expect(find.text('middle'), findsOneWidget);
+    expect(find.text('United States (IRS)'), findsOneWidget);
+    expect(find.text('Established (~90k–170k)'), findsOneWidget);
+    expect(find.text('Single'), findsOneWidget);
   });
 
   testWidgets('Save button should be enabled when fields are selected', (WidgetTester tester) async {
