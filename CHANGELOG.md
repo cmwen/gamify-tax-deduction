@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-11-02
+
+### Added
+- Dark theme toggle with persisted preferences and a new theme service.
+- Work-from-home tracking flow with weekly summaries and rich detail views.
+- Full data export service that shares receipts and WFH logs as formatted JSON.
+
+### Changed
+- Updated analyzer configuration to support Flutter 3.24 while silencing new deprecations.
+
+### Fixed
+- Cleaned up analyzer warnings introduced with the Flutter 3.35 upgrade.
+
 ## [1.0.2] - 2025-10-26
 
 ### Added
