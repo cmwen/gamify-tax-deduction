@@ -405,9 +405,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 4),
             Text('Estimated deduction: AUD ${_wfhSavings.toStringAsFixed(2)}'),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'Keep track of your fixed rate entitlement by logging your work-from-home days each week.',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
             const SizedBox(height: 12),
             SizedBox(

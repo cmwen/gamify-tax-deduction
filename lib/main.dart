@@ -34,7 +34,7 @@ class GamifiedTaxDeductionApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeService>(
       builder: (context, themeService, _) {
-        final baseColor = Colors.green;
+        const Color baseColor = Colors.green;
         final ThemeData lightTheme = ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: baseColor),
           brightness: Brightness.light,

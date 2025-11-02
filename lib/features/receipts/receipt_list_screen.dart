@@ -47,11 +47,12 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
               try {
                 await _exportService.exportAllData();
               } catch (error) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Export failed: $error')),
-                  );
+                if (!context.mounted) {
+                  return;
                 }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Export failed: $error')),
+                );
               }
             },
           ),
@@ -130,14 +131,15 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                               ReceiptDetailScreen(receiptId: receipt.id),
                         ),
                       );
-                      if (mounted) {
-                        if (result == true) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Receipt removed.')),
-                          );
-                        }
-                        await _refresh();
+                      if (!context.mounted) {
+                        return;
                       }
+                      if (result == true) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Receipt removed.')),
+                        );
+                      }
+                      await _refresh();
                     },
                   ),
                 );

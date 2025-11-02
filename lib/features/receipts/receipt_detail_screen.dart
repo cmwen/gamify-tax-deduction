@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../core/database/database_helper.dart';
 import '../../core/models/data_models.dart';
-import '../../core/models/user_profile.dart';
 import '../../core/services/profile_service.dart';
 import '../../core/services/tax_calculation_service.dart';
 import 'receipt_categories.dart';
@@ -158,7 +157,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String?>(
-                      value: selectedCategory,
+                      initialValue: selectedCategory,
                       items: [
                         const DropdownMenuItem<String?>(
                           value: null,
