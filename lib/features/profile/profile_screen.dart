@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../../core/models/user_profile.dart';
 import '../../core/services/profile_service.dart';
+import '../../core/services/theme_service.dart';
 
 class _OptionDetail {
   final String label;
@@ -15,7 +18,8 @@ const Map<TaxCountry, _OptionDetail> _taxCountryDetails = {
   ),
   TaxCountry.australia: _OptionDetail(
     label: 'Australia (ATO)',
-    description: 'Choose this if you lodge tax returns with the Australian Taxation Office.',
+    description:
+        'Choose this if you lodge tax returns with the Australian Taxation Office.',
   ),
 };
 
@@ -49,7 +53,8 @@ const Map<FilingStatus, _OptionDetail> _filingStatusDetails = {
   ),
   FilingStatus.marriedFilingJointly: _OptionDetail(
     label: 'Married filing jointly',
-    description: 'US couples filing together. Australian couples usually select Single.',
+    description:
+        'US couples filing together. Australian couples usually select Single.',
   ),
   FilingStatus.marriedFilingSeparately: _OptionDetail(
     label: 'Married filing separately',
@@ -140,7 +145,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currencyLabel = _selectedTaxCountry == TaxCountry.australia ? 'AUD' : 'USD';
+    final currencyLabel =
+        _selectedTaxCountry == TaxCountry.australia ? 'AUD' : 'USD';
+    final isAustralia = _selectedTaxCountry == TaxCountry.australia;
 
     return Scaffold(
       appBar: AppBar(
@@ -174,7 +181,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onChanged: (newValue) {
                         setState(() {
                           _selectedTaxCountry = newValue;
+                          if (newValue == TaxCountry.australia) {
+                            _selectedFilingStatus = FilingStatus.single;
+                          }
                         });
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'App appearance:',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 8),
+                    Consumer<ThemeService>(
+                      builder: (context, themeService, _) {
+                        final mode = themeService.themeMode;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            RadioListTile<ThemeMode>(
+                              value: ThemeMode.system,
+                              groupValue: mode,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  themeService.updateThemeMode(value);
+                                }
+                              },
+                              title: const Text('Match system'),
+                            ),
+                            RadioListTile<ThemeMode>(
+                              value: ThemeMode.light,
+                              groupValue: mode,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  themeService.updateThemeMode(value);
+                                }
+                              },
+                              title: const Text('Light theme'),
+                            ),
+                            RadioListTile<ThemeMode>(
+                              value: ThemeMode.dark,
+                              groupValue: mode,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  themeService.updateThemeMode(value);
+                                }
+                              },
+                              title: const Text('Dark theme'),
+                            ),
+                          ],
+                        );
                       },
                     ),
                     const SizedBox(height: 24),
@@ -201,32 +257,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'Select your filing status:',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 8),
-                    DropdownButton<FilingStatus>(
-                      value: _selectedFilingStatus,
-                      isExpanded: true,
-                      hint: const Text('Select filing status'),
-                      items: FilingStatus.values.map((value) {
-                        final detail = _filingStatusDetails[value]!;
-                        return DropdownMenuItem<FilingStatus>(
-                          value: value,
-                          child: _buildOptionContent(detail),
-                        );
-                      }).toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          _selectedFilingStatus = newValue;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 24),
+                    if (!isAustralia) ...[
+                      const Text(
+                        'Select your filing status:',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButton<FilingStatus>(
+                        value: _selectedFilingStatus,
+                        isExpanded: true,
+                        hint: const Text('Select filing status'),
+                        items: FilingStatus.values.map((value) {
+                          final detail = _filingStatusDetails[value]!;
+                          return DropdownMenuItem<FilingStatus>(
+                            value: value,
+                            child: _buildOptionContent(detail),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedFilingStatus = newValue;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                    ] else ...[
+                      Card(
+                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        child: const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text(
+                            'Filing status is not required for Australian tax calculations.\nWe will automatically apply the standard rate.',
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
                     const Text(
                       'Disclaimer: This information is used for estimation purposes only and is not professional tax advice.',
-                      style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.grey),
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey),
                     ),
                     const SizedBox(height: 32),
                     SizedBox(

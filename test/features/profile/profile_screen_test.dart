@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gamified_tax_deduction/core/models/user_profile.dart';
 import 'package:gamified_tax_deduction/core/services/profile_service.dart';
+import 'package:gamified_tax_deduction/core/services/theme_service.dart';
 import 'package:gamified_tax_deduction/features/profile/profile_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -30,7 +32,14 @@ void main() {
 
   // Helper function to build the widget
   Future<void> pumpScreen(WidgetTester tester) async {
-     await tester.pumpWidget(MaterialApp(home: ProfileScreen(profileService: mockProfileService)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ChangeNotifierProvider(
+          create: (_) => ThemeService(),
+          child: ProfileScreen(profileService: mockProfileService),
+        ),
+      ),
+    );
   }
 
   testWidgets('should display profile data on load', (WidgetTester tester) async {
@@ -59,16 +68,25 @@ void main() {
     when(mockProfileService.saveProfile(any)).thenAnswer((_) async {});
 
     await tester.pumpWidget(MaterialApp(
-      home: Navigator(
-        onGenerateRoute: (settings) => MaterialPageRoute(
-          builder: (context) => ProfileScreen(profileService: mockProfileService),
+      home: ChangeNotifierProvider(
+        create: (_) => ThemeService(),
+        child: Navigator(
+          onGenerateRoute: (settings) => MaterialPageRoute(
+            builder: (context) => ProfileScreen(profileService: mockProfileService),
+          ),
         ),
       ),
     ));
 
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(ElevatedButton));
+    final saveButton = tester.widget<ElevatedButton>(
+      find.widgetWithText(ElevatedButton, 'Save Profile'),
+    );
+    expect(saveButton.onPressed, isNotNull);
+
+    await tester.ensureVisible(find.text('Save Profile'));
+    await tester.tap(find.text('Save Profile'));
     await tester.pumpAndSettle();
 
     verify(mockProfileService.saveProfile(any)).called(1);

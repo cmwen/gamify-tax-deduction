@@ -11,6 +11,7 @@ import '../../core/services/tax_calculation_service.dart';
 import '../../core/services/profile_service.dart';
 import '../../core/models/user_profile.dart';
 import '../educational/educational_tip_widgets.dart';
+import '../receipts/receipt_categories.dart';
 import 'receipt_review_screen.dart';
 
 class ReceiptScannerScreen extends StatefulWidget {
