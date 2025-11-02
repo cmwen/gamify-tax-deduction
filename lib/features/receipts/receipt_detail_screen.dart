@@ -157,7 +157,8 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String?>(
-                      initialValue: selectedCategory,
+                      // ignore: deprecated_member_use
+                      value: selectedCategory,
                       items: [
                         const DropdownMenuItem<String?>(
                           value: null,

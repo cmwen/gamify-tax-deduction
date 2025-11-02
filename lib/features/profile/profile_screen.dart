@@ -196,30 +196,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Consumer<ThemeService>(
                       builder: (context, themeService, _) {
                         final mode = themeService.themeMode;
-                        return RadioGroup<ThemeMode>(
-                          groupValue: mode,
-                          onChanged: (value) {
-                            if (value != null) {
-                              themeService.updateThemeMode(value);
-                            }
-                          },
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              RadioListTile<ThemeMode>(
-                                value: ThemeMode.system,
-                                title: Text('Match system'),
-                              ),
-                              RadioListTile<ThemeMode>(
-                                value: ThemeMode.light,
-                                title: Text('Light theme'),
-                              ),
-                              RadioListTile<ThemeMode>(
-                                value: ThemeMode.dark,
-                                title: Text('Dark theme'),
-                              ),
-                            ],
-                          ),
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            RadioListTile<ThemeMode>(
+                              value: ThemeMode.system,
+                              // ignore: deprecated_member_use
+                              groupValue: mode,
+                              // ignore: deprecated_member_use
+                              onChanged: (value) {
+                                if (value != null) {
+                                  themeService.updateThemeMode(value);
+                                }
+                              },
+                              title: const Text('Match system'),
+                            ),
+                            RadioListTile<ThemeMode>(
+                              value: ThemeMode.light,
+                              // ignore: deprecated_member_use
+                              groupValue: mode,
+                              // ignore: deprecated_member_use
+                              onChanged: (value) {
+                                if (value != null) {
+                                  themeService.updateThemeMode(value);
+                                }
+                              },
+                              title: const Text('Light theme'),
+                            ),
+                            RadioListTile<ThemeMode>(
+                              value: ThemeMode.dark,
+                              // ignore: deprecated_member_use
+                              groupValue: mode,
+                              // ignore: deprecated_member_use
+                              onChanged: (value) {
+                                if (value != null) {
+                                  themeService.updateThemeMode(value);
+                                }
+                              },
+                              title: const Text('Dark theme'),
+                            ),
+                          ],
                         );
                       },
                     ),
@@ -273,7 +289,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 24),
                     ] else ...[
                       Card(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(context).colorScheme.surface,
                         child: const Padding(
                           padding: EdgeInsets.all(16.0),
                           child: Text(
