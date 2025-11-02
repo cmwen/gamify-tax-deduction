@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../receipts/receipt_categories.dart';
+
 class ReceiptReviewResult {
   final double amount;
   final String? vendorName;
@@ -31,16 +33,6 @@ class ReceiptReviewScreen extends StatefulWidget {
 }
 
 class _ReceiptReviewScreenState extends State<ReceiptReviewScreen> {
-  static const List<String> _categories = [
-    'general',
-    'business_meals',
-    'home_office',
-    'equipment',
-    'mileage',
-    'office_supplies',
-    'professional_services',
-  ];
-
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _amountController;
   late final TextEditingController _vendorController;
@@ -160,7 +152,7 @@ class _ReceiptReviewScreenState extends State<ReceiptReviewScreen> {
                   ),
                   // ignore: deprecated_member_use
                   value: _selectedCategory,
-                  items: _categories
+                  items: receiptCategories
                       .map(
                         (category) => DropdownMenuItem(
                           value: category,
@@ -213,15 +205,4 @@ class _ReceiptReviewScreenState extends State<ReceiptReviewScreen> {
       ),
     );
   }
-
-}
-
-String formatCategoryLabel(String value) {
-  return value
-      .split('_')
-      .map(
-        (segment) =>
-            segment.isEmpty ? segment : segment[0].toUpperCase() + segment.substring(1),
-      )
-      .join(' ');
 }

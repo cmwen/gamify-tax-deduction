@@ -6,12 +6,14 @@ import '../../core/models/data_models.dart';
 import '../../core/models/educational_tip.dart';
 import '../../core/models/user_profile.dart';
 import '../../core/services/profile_service.dart';
+import '../../core/services/work_from_home_service.dart';
 import '../receipt_scanner/receipt_scanner_screen.dart';
 import '../profile/profile_screen.dart';
 import '../achievements/achievements_screen.dart';
 import '../achievements/achievement_notification.dart';
 import '../educational/educational_tip_widgets.dart';
 import '../receipts/receipt_list_screen.dart';
+import '../wfh/work_from_home_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -26,7 +28,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Receipt> recentReceipts = [];
   bool _showTipOfTheDay = true;
   final ProfileService _profileService = ProfileService();
+  final WorkFromHomeService _wfhService = WorkFromHomeService();
   UserProfile? _userProfile;
+  double _wfhHours = 0;
+  double _wfhSavings = 0;
 
   @override
   void initState() {
@@ -44,21 +49,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final receipts = await DatabaseHelper.instance.getAllReceipts();
     final profile = await _profileService.getOrCreateProfile();
 
+    double wfhHours = 0;
+    double wfhSavings = 0;
+    if (profile.taxCountry == TaxCountry.australia) {
+      final entries = await _wfhService.getEntries();
+      wfhHours = _wfhService.totalLoggedHours(entries);
+      wfhSavings = _wfhService.calculatePotentialSavings(wfhHours);
+    }
+
     setState(() {
       totalSavings = savings;
       receiptCount = count;
       recentReceipts = receipts.take(5).toList();
       _userProfile = profile;
+      _wfhHours = wfhHours;
+      _wfhSavings = wfhSavings;
     });
-    
+
     // Check for newly unlocked achievements
     await _checkAndShowAchievements();
   }
 
   Future<void> _checkAndShowAchievements() async {
-    final achievementService = Provider.of<AchievementService>(context, listen: false);
-    final newAchievements = await achievementService.checkAchievements(receiptCount, totalSavings);
-    
+    final achievementService =
+        Provider.of<AchievementService>(context, listen: false);
+    final newAchievements =
+        await achievementService.checkAchievements(receiptCount, totalSavings);
+
     // Show notifications for newly unlocked achievements
     if (mounted && newAchievements.isNotEmpty) {
       for (final achievement in newAchievements) {
@@ -76,6 +93,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final tipCountry = _userProfile?.taxCountry ?? TaxCountry.unitedStates;
+    final showWfhCard = _userProfile?.taxCountry == TaxCountry.australia;
 
     return Scaffold(
       appBar: AppBar(
@@ -84,7 +102,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.lightbulb_outline),
-            onPressed: () => EducationalTipsSheet.show(context, country: tipCountry),
+            onPressed: () =>
+                EducationalTipsSheet.show(context, country: tipCountry),
             tooltip: 'Tax Tips',
           ),
           IconButton(
@@ -194,7 +213,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       },
                     ),
                   if (_showTipOfTheDay) const SizedBox(height: 16),
-                  
+
                   // Gamification section with progress
                   Card(
                     child: Padding(
@@ -212,13 +231,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           const SizedBox(height: 16),
                           Row(
                             children: [
-                              const Icon(Icons.receipt_long, color: Colors.blue),
+                              const Icon(Icons.receipt_long,
+                                  color: Colors.blue),
                               const SizedBox(width: 8),
                               Text('$receiptCount receipts tracked'),
                             ],
                           ),
                           const SizedBox(height: 12),
-                          
+
                           // Progress bar toward next milestone
                           _buildProgressBar(
                             context,
@@ -231,7 +251,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
+                  if (showWfhCard) ...[
+                    _buildWfhSummaryCard(context),
+                    const SizedBox(height: 16),
+                  ],
+
                   // Recent receipts
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -344,6 +369,71 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _buildWfhSummaryCard(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Work From Home log',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.open_in_new),
+                  tooltip: 'Manage log',
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const WorkFromHomeScreen(),
+                      ),
+                    );
+                    if (mounted) {
+                      _loadDashboardData();
+                    }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text('Logged hours: ${_wfhHours.toStringAsFixed(1)}'),
+            const SizedBox(height: 4),
+            Text('Estimated deduction: AUD ${_wfhSavings.toStringAsFixed(2)}'),
+            const SizedBox(height: 8),
+            const Text(
+              'Keep track of your fixed rate entitlement by logging your work-from-home days each week.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const WorkFromHomeScreen(),
+                    ),
+                  );
+                  if (mounted) {
+                    _loadDashboardData();
+                  }
+                },
+                icon: const Icon(Icons.add_task),
+                label: const Text('Log a new week'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildProgressBar(
     BuildContext context,
     String label,
@@ -386,7 +476,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   double _getNextMilestone(double current) {
-    const milestones = [100.0, 250.0, 500.0, 1000.0, 1500.0, 2000.0, 3000.0, 5000.0];
+    const milestones = [
+      100.0,
+      250.0,
+      500.0,
+      1000.0,
+      1500.0,
+      2000.0,
+      3000.0,
+      5000.0
+    ];
     for (final milestone in milestones) {
       if (current < milestone) {
         return milestone;

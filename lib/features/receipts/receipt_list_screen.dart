@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/database/database_helper.dart';
 import '../../core/models/data_models.dart';
-import '../receipt_scanner/receipt_review_screen.dart';
+import '../../core/services/data_export_service.dart';
+import 'receipt_categories.dart';
+import 'receipt_detail_screen.dart';
 
 class ReceiptListScreen extends StatefulWidget {
   const ReceiptListScreen({super.key});
@@ -13,6 +15,7 @@ class ReceiptListScreen extends StatefulWidget {
 
 class _ReceiptListScreenState extends State<ReceiptListScreen> {
   final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
+  final DataExportService _exportService = DataExportService();
   late Future<List<Receipt>> _receiptsFuture;
 
   @override
@@ -36,6 +39,24 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
       appBar: AppBar(
         title: const Text('Receipts'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.ios_share),
+            tooltip: 'Export data',
+            onPressed: () async {
+              try {
+                await _exportService.exportAllData();
+              } catch (error) {
+                if (!context.mounted) {
+                  return;
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Export failed: $error')),
+                );
+              }
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List<Receipt>>(
         future: _receiptsFuture,
@@ -102,6 +123,24 @@ class _ReceiptListScreenState extends State<ReceiptListScreen> {
                         ),
                       ],
                     ),
+                    onTap: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ReceiptDetailScreen(receiptId: receipt.id),
+                        ),
+                      );
+                      if (!context.mounted) {
+                        return;
+                      }
+                      if (result == true) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Receipt removed.')),
+                        );
+                      }
+                      await _refresh();
+                    },
                   ),
                 );
               },

@@ -9,7 +9,7 @@ class Receipt {
   final double totalAmount;
   final double potentialTaxSaving;
   final String? category; // For Post-MVP
-  
+
   const Receipt({
     required this.id,
     required this.createdAt,
@@ -41,6 +41,26 @@ class Receipt {
       totalAmount: map['totalAmount'],
       potentialTaxSaving: map['potentialTaxSaving'],
       category: map['category'],
+    );
+  }
+
+  Receipt copyWith({
+    String? id,
+    DateTime? createdAt,
+    String? imagePath,
+    String? vendorName,
+    double? totalAmount,
+    double? potentialTaxSaving,
+    String? category,
+  }) {
+    return Receipt(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      imagePath: imagePath ?? this.imagePath,
+      vendorName: vendorName ?? this.vendorName,
+      totalAmount: totalAmount ?? this.totalAmount,
+      potentialTaxSaving: potentialTaxSaving ?? this.potentialTaxSaving,
+      category: category ?? this.category,
     );
   }
 }
